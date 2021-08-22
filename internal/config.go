@@ -22,14 +22,26 @@ type Config struct {
 	Rules []*Rule
 }
 
+func (c *Config) Format() error {
+	for _, r := range c.Rules {
+		if e := r.Format(); e != nil {
+			return e
+		}
+	}
+	return nil
+}
+
 func (c *Config) Rule() (*Rule, error) {
+	if len(c.Rules) == 0 {
+		return nil, fmt.Errorf("bin-auto-switcher has no rules")
+	}
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
-	if len(c.Rules) == 0 {
-		return nil, fmt.Errorf("bin-auto-switcher has no rules")
-	}
+
+	wd = wd + string(filepath.Separator)
+
 	var ms []struct {
 		Rule  *Rule
 		Score int
@@ -55,9 +67,10 @@ func (c *Config) Rule() (*Rule, error) {
 }
 
 type Rule struct {
-	Dir []string
-	Cmd string
-	Env []string
+	Dir  []string
+	Cmd  string
+	Args []string
+	Env  []string
 }
 
 func (r *Rule) Match(wd string) int {
@@ -70,15 +83,30 @@ func (r *Rule) Match(wd string) int {
 			return 1
 		}
 
-		if dir == wd {
-			return 10000
-		}
-
-		if strings.HasPrefix(dir, wd) {
-			return (len(dir) - len(wd)) * 5
+		if strings.HasPrefix(wd, dir) {
+			return len(dir) * 5
 		}
 	}
 	return 0
+}
+
+func (r *Rule) Format() error {
+	if len(r.Dir) == 0 {
+		return nil
+	}
+	for i := 0; i < len(r.Dir); i++ {
+		dir := r.Dir[i]
+		if len(dir) == 0 {
+			continue
+		}
+		dir = filepath.Clean(dir)
+		if strings.HasPrefix(dir, "~") {
+			dir = filepath.Join(homeDir, dir[1:])
+		}
+		dir = dir + string(filepath.Separator)
+		r.Dir[i] = dir
+	}
+	return nil
 }
 
 var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
@@ -86,7 +114,12 @@ var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
 const caseInsensitiveEnv = runtime.GOOS == "windows"
 
 func (r *Rule) Run(args []string) {
-	cmd := exec.Command(r.Cmd, args...)
+	ss := strings.Fields(r.Cmd)
+	cmdName := ss[0]
+	cmdArgs := append(ss[1:], r.Args...)
+	cmdArgs = append(cmdArgs, args...)
+
+	cmd := exec.Command(cmdName, cmdArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -101,17 +134,16 @@ func (r *Rule) Run(args []string) {
 }
 
 func ConfigPath(name string) string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Join(home, ".config", "bin-auto-switcher", name+".toml")
+	return filepath.Join(homeDir, ".config", "bin-auto-switcher", name+".toml")
 }
 
 func LoadConfig(name string) (*Config, error) {
 	fp := ConfigPath(name)
 	var cfg *Config
 	if _, err := toml.DecodeFile(fp, &cfg); err != nil {
+		return nil, err
+	}
+	if err := cfg.Format(); err != nil {
 		return nil, err
 	}
 	return cfg, nil

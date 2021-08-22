@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"os"
 	"strings"
 )
 
@@ -29,4 +30,14 @@ func dedupEnv(caseInsensitive bool, env []string) []string {
 		}
 	}
 	return out
+}
+
+var homeDir string
+
+func init() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	homeDir = home
 }

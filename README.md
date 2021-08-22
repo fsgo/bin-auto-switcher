@@ -22,7 +22,10 @@ Env =["k1=v1","k2=v2"]
 [[Rules]]
 Dir = ["~/workspace/fsgo/bin-auto-switcher"]
 Cmd = "go1.17"
+# cmd args, Optional
+#Args = []
 ```
+
 
 then in `~/workspace/fsgo/bin-auto-switcher`:
 ```
