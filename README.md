@@ -16,48 +16,6 @@ config file:
 ~/.config/bin-auto-switcher/{cmd}.toml
 ```
 
-for command `go`:
-```
-# cd /home/work/go/bin/ && ls -l
--rwxr-xr-x 1 work work  2550992  8 22 21:56 bin-auto-switcher
-lrwxr-xr-x 1 work work       17  8 22 20:48 go -> bin-auto-switcher
-```
- `go` is the symlink off `bin-auto-switcher`, you should create it manual.
-
-
-it's config is `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
-```toml
-# config for 'go' command
-
-# default rule
-[[Rules]]
-# other k-v env, Optional
-Env =["k1=v1","k2=v2"]
-# command, Required
-Cmd = "go1.16.7"
-# cmd args, Optional
-# Args = []
-
-# rule for dir
-[[Rules]]
-Dir = ["~/workspace/fsgo/bin-auto-switcher"]
-Cmd = "go1.17"
-```
-
-
-then check it in `~/workspace/fsgo/bin-auto-switcher`:
-```
-# go version
-go version go1.17 darwin/amd64
-```
-actual was executed the `go1.17`  
-
-in other dir (eg: `~/workspace/`):
-```
-# go version
-go version go1.16.7 darwin/amd64
-```
-actual was executed the `go1.16.7`
 
 ## 3. create Symlink for `mycmd`
 
@@ -87,3 +45,48 @@ then you can try it:
 ```
 # mycmd
 ```
+
+
+## 4. Example
+### 4.1 multiple Go versions
+you should already [install multiple Go versions](https://golang.google.cn/doc/manage-install)
+
+#### 1.create Symlink for `go`:
+```
+# cd /home/work/go/bin/
+# ln -s bin-auto-switcher go
+```
+
+#### 2. edit config file `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
+```toml
+# config for 'go' command
+
+# default rule
+[[Rules]]
+# other k-v env, Optional
+Env =["k1=v1","k2=v2"]
+# command, Required
+Cmd = "go1.16.7"
+# cmd args, Optional
+# Args = []
+
+# rule for dir
+[[Rules]]
+Dir = ["~/workspace/fsgo/myserver"]
+Cmd = "go1.17"
+```
+
+#### 3. Check It:
+at  `~/workspace/fsgo/myserver`:
+```
+# go version
+go version go1.17 darwin/amd64
+```
+actual was executed the `go1.17`
+
+at other dirs (eg: `~/workspace/`):
+```
+# go version
+go version go1.16.7 darwin/amd64
+```
+actual was executed the `go1.16.7`
