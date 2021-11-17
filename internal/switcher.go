@@ -6,6 +6,7 @@ package internal
 
 import (
 	"log"
+	"path/filepath"
 )
 
 func Execute(args []string) {
@@ -16,7 +17,7 @@ func Execute(args []string) {
 }
 
 func execute(name string, args []string) {
-	cfg, err := LoadConfig(name)
+	cfg, err := LoadConfig(filepath.Base(name))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
