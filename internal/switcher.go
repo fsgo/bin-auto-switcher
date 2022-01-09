@@ -7,17 +7,34 @@ package internal
 import (
 	"log"
 	"path/filepath"
+	"strings"
 )
+
+const selfBinName = "bin-auto-switcher"
 
 func Execute(args []string) {
 	if len(args) == 0 {
 		panic("min args is 1, got 0")
 	}
-	execute(args[0], args[1:])
+	app := getApp(filepath.Base(args[0]))
+
+	if app == selfBinName || strings.HasPrefix(app, selfBinName) {
+		executeSelf(args[1:])
+		return
+	}
+
+	execute(app, args[1:])
+}
+
+func getApp(name string) string {
+	if !isWindows() {
+		return name
+	}
+	return strings.TrimRight(name, ".exe")
 }
 
 func execute(name string, args []string) {
-	cfg, err := LoadConfig(filepath.Base(name))
+	cfg, err := LoadConfig(name)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

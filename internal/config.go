@@ -139,6 +139,10 @@ func ConfigPath(name string) string {
 
 func LoadConfig(name string) (*Config, error) {
 	fp := ConfigPath(name)
+	if _, err := os.Stat(fp); err != nil && os.IsNotExist(err) {
+		tpl := cmdTPl(name + "_xxx")
+		return nil, fmt.Errorf("config %q not exists, you can create it like this:\n %s", fp, tpl)
+	}
 	var cfg *Config
 	if _, err := toml.DecodeFile(fp, &cfg); err != nil {
 		return nil, err
@@ -147,4 +151,30 @@ func LoadConfig(name string) (*Config, error) {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+var configTpl = `
+# The default rules
+[[Rules]]
+Cmd = "{CMD}"                  # Required
+# Args = [""]                  # Optional, extra args for command
+# Env = ["k1=v1","k2=v2"]      # Optional, extra env variable for command
+
+# Rules for some dirs
+#[[Rules]]
+#Dir = ["/home/work/dir_1/"]   # Required
+#Cmd = "{CMD}_v1"              # Required
+# Args = [""]                  # Optional, extra args for command
+# Env = ["k1=v1","k2=v2"]      # Optional, extra env variable for command
+
+
+# Rules for other dirs
+#[[Rules]]
+#Dir = ["/home/work/dir_2/"]   # Required
+#Cmd = "{CMD}_v2"              # Required
+
+`
+
+func cmdTPl(name string) string {
+	return strings.ReplaceAll(configTpl, "{CMD}", name)
 }

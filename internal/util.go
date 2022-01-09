@@ -6,8 +6,13 @@ package internal
 
 import (
 	"os"
+	"runtime"
 	"strings"
 )
+
+func isWindows() bool {
+	return runtime.GOOS == "windows"
+}
 
 func dedupEnv(caseInsensitive bool, env []string) []string {
 	out := make([]string, 0, len(env))
