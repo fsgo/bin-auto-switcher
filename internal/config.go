@@ -128,6 +128,7 @@ func (r *Rule) Run(args []string) {
 	signal.Notify(make(chan os.Signal), signalsToIgnore...)
 
 	if err := cmd.Run(); err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	os.Exit(0)
