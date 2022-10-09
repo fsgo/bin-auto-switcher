@@ -7,7 +7,6 @@ package internal
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -92,7 +91,7 @@ func cmdLink(target string, linkName string) error {
 		return nil
 	}
 
-	if err = ioutil.WriteFile(cp, []byte(cmdTPl(target)), 0644); err != nil {
+	if err = os.WriteFile(cp, []byte(cmdTPl(target)), 0644); err != nil {
 		return err
 	}
 	return nil
