@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -30,8 +31,8 @@ Self-Update :
           go install github.com/fsgo/bin-auto-switcher@main
 
 Site    : https://github.com/fsgo/bin-auto-switcher
-Version : 0.1.0
-Date    : 2022-01-08
+Version : 0.1.1
+Date    : 2022-10-30
 `
 
 func usage() {
@@ -63,11 +64,11 @@ func executeSelf(args stringSlice) {
 
 func cmdLink(target string, linkName string) error {
 	if isWindows() {
-		return fmt.Errorf("not support yet")
+		return errors.New("not support yet")
 	}
 
 	if len(target) == 0 || len(linkName) == 0 {
-		return fmt.Errorf("invalid params")
+		return errors.New("invalid params")
 	}
 
 	if linkName[0] == '.' || filepath.Base(linkName) != linkName {

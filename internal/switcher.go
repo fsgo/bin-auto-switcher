@@ -38,6 +38,9 @@ func execute(name string, args []string) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+	if cfg.Trace {
+		log.Println("Config:", cfg.filePath)
+	}
 	rule, err := cfg.Rule()
 	if err != nil {
 		log.Fatalln(err.Error())

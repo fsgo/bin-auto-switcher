@@ -40,6 +40,15 @@ Cmd = "go1.16.7"           # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
 
+
+# [[Rules.Pre]]            # Optional, pre command
+# Cmd ="pre cmd"
+# Args ="args"
+
+# [[Rules.Post]]           # Optional, post command
+# Cmd ="pre cmd"
+# Args ="args"
+
 # rule for some dir
 [[Rules]]
 Dir = ["~/workspace/fsgo/myserver"]
