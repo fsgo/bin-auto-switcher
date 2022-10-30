@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -45,4 +46,11 @@ func init() {
 		panic(err)
 	}
 	homeDir = home
+}
+
+const consoleColorTag = 0x1B
+
+// ConsoleRed 控制台红色字符
+func ConsoleRed(txt string) string {
+	return fmt.Sprintf("%c[31m%s%c[0m", consoleColorTag, txt, consoleColorTag)
 }

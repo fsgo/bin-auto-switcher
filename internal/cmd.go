@@ -20,7 +20,6 @@ type Command struct {
 	Match   string // 正则表达式
 	Timeout time.Duration
 	Trace   bool
-	typ     string // 类型，如 Before
 }
 
 func (c *Command) IsMatch(str string) (bool, error) {
@@ -52,7 +51,8 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		log.Println("Exec:", cmd.String(), "Timeout:", timeout)
 	}
 	if err := cmd.Run(); err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
+		fmt.Fprint(os.Stderr, ConsoleRed(msg))
 		os.Exit(1)
 	}
 }

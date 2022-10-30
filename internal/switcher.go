@@ -30,7 +30,7 @@ func getApp(name string) string {
 	if !isWindows() {
 		return name
 	}
-	return strings.TrimRight(name, ".exe")
+	return strings.TrimRight(name, ".ex")
 }
 
 func execute(name string, args []string) {

@@ -10,12 +10,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
-	"syscall"
 
 	"github.com/BurntSushi/toml"
 )
@@ -136,7 +134,7 @@ func (r *Rule) Format() error {
 
 const caseInsensitiveEnv = runtime.GOOS == "windows"
 
-var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
+// var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
 
 func (r *Rule) Run(args []string) {
 	ss := strings.Fields(r.Cmd)
@@ -149,7 +147,7 @@ func (r *Rule) Run(args []string) {
 	env = append(env, fmt.Sprintf(envKeyPrefix+"_CMD=%s", cmdName))
 	env = append(env, fmt.Sprintf(envKeyPrefix+"_ARGS=%q", cmdArgsStr))
 
-	signal.Notify(make(chan os.Signal), signalsToIgnore...)
+	// signal.Notify(make(chan os.Signal), signalsToIgnore...)
 
 	s0 := strings.Repeat("-", 40)
 	s1 := strings.Repeat("=", 40)
