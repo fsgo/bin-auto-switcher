@@ -21,9 +21,9 @@ import (
 const envKeyPrefix = "Bin_Auto_SW"
 
 type Config struct {
-	Trace    bool
-	Rules    []*Rule
 	filePath string
+	Rules    []*Rule
+	Trace    bool
 }
 
 func (c *Config) Format() error {
@@ -86,14 +86,14 @@ func (c *Config) Rule() (*Rule, error) {
 }
 
 type Rule struct {
-	Trace bool
-	Dir   []string
-	Cmd   string
-	Args  []string
-	Env   []string
+	Cmd  string
+	Dir  []string
+	Args []string
+	Env  []string
 
-	Pre  []*Command
-	Post []*Command
+	Pre   []*Command
+	Post  []*Command
+	Trace bool
 }
 
 func (r *Rule) Match(wd string) int {

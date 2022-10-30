@@ -17,8 +17,8 @@ import (
 
 type Command struct {
 	Cmd       string
-	Args      []string
 	Match     string // 正则表达式
+	Args      []string
 	Timeout   time.Duration
 	Trace     bool
 	AllowFail bool
@@ -57,7 +57,10 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 	err := cmd.Run()
 	if err != nil {
 		msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
-		fmt.Fprint(os.Stderr, ConsoleRed(msg))
+		if c.AllowFail {
+			msg += ", skipped"
+		}
+		fmt.Fprintln(os.Stderr, ConsoleRed(msg))
 		if !c.AllowFail {
 			exitCode := 1
 			if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() > 0 {
