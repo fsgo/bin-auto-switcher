@@ -246,7 +246,6 @@ func LoadConfig(name string) (*Config, error) {
 }
 
 var configTpl = `
-# The default rules
 [[Rules]]
 Cmd = "{CMD}"                  # Required
 # Args = [""]                  # Optional, extra args for command
@@ -254,19 +253,21 @@ Cmd = "{CMD}"                  # Required
 
 # [[Rules.Pre]]                # Optional, pre command
 # Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
-# Cmd   = ""
+# Cmd   = ""                   # Required
 # Args  = [""]                 # Optional
+# AllowFail = true/false       # Optional
+# Timeout = "2m"               # Optional, exec timeout, default 1 min
 
 # [[Rules.Post]]               # Optional, post command
 # Cmd  = ""
 # Args = [""]
 
 # Rules for some dirs
-#[[Rules]]
-#Dir = ["/home/work/dir_1/"]   # Required
-#Cmd = "{CMD}_v1"              # Required
-# Args = [""]                  # Optional, extra args for command
-# Env = ["k1=v1","k2=v2"]      # Optional, extra env variable for command
+# [[Rules]]
+# Dir = ["/home/work/dir_1/"]   # Required
+# Cmd = "{CMD}_v1"              # Required
+# Args = [""]                   # Optional, extra args for command
+# Env = ["k1=v1","k2=v2"]       # Optional, extra env variable for command
 
 
 # Rules for other dirs

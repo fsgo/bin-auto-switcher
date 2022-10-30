@@ -27,7 +27,7 @@ bin-auto-switcher ln go1.16.7 go
 or
 
 ```bash
-# cd /home/work/go/bin/
+# cd ~/go/bin/
 # ln -s bin-auto-switcher go
 ```
 #### 2. edit config file `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
@@ -40,14 +40,16 @@ Cmd = "go1.16.7"           # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
 
+# [[Rules.Pre]]                # Optional, pre command
+# Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
+# Cmd   = ""                   # Required
+# Args  = [""]                 # Optional
+# AllowFail = true/false       # Optional
+# Timeout = "2m"               # Optional, exec timeout, default 1 min
 
-# [[Rules.Pre]]            # Optional, pre command
-# Cmd ="pre cmd"
-# Args ="args"
-
-# [[Rules.Post]]           # Optional, post command
-# Cmd ="pre cmd"
-# Args ="args"
+# [[Rules.Post]]               # Optional, post command
+# Cmd  = ""
+# Args = [""]
 
 # rule for some dir
 [[Rules]]
@@ -68,12 +70,12 @@ Cmd = "go1.17"
 # go version
 go version go1.17 darwin/amd64
 ```
-actual was executed the `go1.17`
+actual was executed the `go1.17` command.
 
 -----------
-②  At other dirs (eg: `~/workspace/`):
+②  At other dirs (e.g.: `~/workspace/`):
 ```bash
 # go version
 go version go1.16.7 darwin/amd64
 ```
-actual was executed the `go1.16.7`
+actual was executed the `go1.16.7` command.

@@ -16,11 +16,12 @@ import (
 )
 
 type Command struct {
-	Cmd     string
-	Args    []string
-	Match   string // 正则表达式
-	Timeout time.Duration
-	Trace   bool
+	Cmd       string
+	Args      []string
+	Match     string // 正则表达式
+	Timeout   time.Duration
+	Trace     bool
+	AllowFail bool
 }
 
 func (c *Command) IsMatch(str string) (bool, error) {
@@ -53,9 +54,16 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		}
 		log.Println("Exec:", cmd.String(), ", Timeout:", timeout)
 	}
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	if err != nil {
 		msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
 		fmt.Fprint(os.Stderr, ConsoleRed(msg))
-		os.Exit(1)
+		if !c.AllowFail {
+			exitCode := 1
+			if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() > 0 {
+				exitCode = cmd.ProcessState.ExitCode()
+			}
+			os.Exit(exitCode)
+		}
 	}
 }
