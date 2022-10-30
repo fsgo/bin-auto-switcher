@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -37,7 +38,9 @@ func (c *Command) getTimeout() time.Duration {
 }
 
 func (c *Command) Exec(ctx context.Context, env []string) {
-	cmd := exec.CommandContext(ctx, c.Cmd, c.Args...)
+	ss := strings.Fields(c.Cmd)
+	args := append(ss[1:], c.Args...)
+	cmd := exec.CommandContext(ctx, ss[0], args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -46,9 +49,9 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 	if c.Trace {
 		var timeout string
 		if dl, ok := ctx.Deadline(); ok {
-			timeout = time.Until(dl).String()
+			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		log.Println("Exec:", cmd.String(), "Timeout:", timeout)
+		log.Println("Exec:", cmd.String(), ", Timeout:", timeout)
 	}
 	if err := cmd.Run(); err != nil {
 		msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())

@@ -31,7 +31,7 @@ Self-Update :
           go install github.com/fsgo/bin-auto-switcher@main
 
 Site    : https://github.com/fsgo/bin-auto-switcher
-Version : 0.1.1
+Version : 0.1.3
 Date    : 2022-10-30
 `
 
