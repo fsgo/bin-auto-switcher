@@ -200,6 +200,10 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 			continue
 		}
 
+		if !pc.CanRun() {
+			continue
+		}
+
 		if err = ctx.Err(); err != nil {
 			log.Println("context canceled:", err.Error())
 			break
@@ -253,6 +257,11 @@ Cmd = "{CMD}"                  # Required
 
 # [[Rules.Pre]]                # Optional, pre command
 # Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
+
+# Cond Optional, extra conditions
+# eg. "go_module","has_file app.toml", "exec hello.sh"
+# Cond  = [""]                
+
 # Cmd   = ""                   # Required
 # Args  = [""]                 # Optional
 # AllowFail = true/false       # Optional

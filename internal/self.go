@@ -22,7 +22,7 @@ SubCommands:
     ln {target} {link_name} :
         Like GNU's 'ln' command, create link {link_name} from {target},
         The config file is '~/.config/bin-auto-switcher/{link_name}.toml'.
-        eg: "bin-auto-switcher ln go1.18 go"
+        eg: "bin-auto-switcher ln go1.19.3 go"
 
     list:
         list all links
@@ -31,8 +31,8 @@ Self-Update :
           go install github.com/fsgo/bin-auto-switcher@main
 
 Site    : https://github.com/fsgo/bin-auto-switcher
-Version : 0.1.3
-Date    : 2022-10-30
+Version : 0.1.4
+Date    : 2022-11-05
 `
 
 func usage() {
