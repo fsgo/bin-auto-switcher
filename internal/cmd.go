@@ -85,19 +85,21 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		}
 		log.Println("Exec:", cmd.String(), ", Timeout:", timeout)
 	}
+
 	err := cmd.Run()
-	if err != nil {
-		msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
-		if c.AllowFail {
-			msg += ", skipped"
+	if err == nil {
+		return
+	}
+	msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
+	if c.AllowFail {
+		msg += ", skipped"
+	}
+	fmt.Fprintln(os.Stderr, ConsoleRed(msg))
+	if !c.AllowFail {
+		exitCode := 1
+		if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() > 0 {
+			exitCode = cmd.ProcessState.ExitCode()
 		}
-		fmt.Fprintln(os.Stderr, ConsoleRed(msg))
-		if !c.AllowFail {
-			exitCode := 1
-			if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() > 0 {
-				exitCode = cmd.ProcessState.ExitCode()
-			}
-			os.Exit(exitCode)
-		}
+		os.Exit(exitCode)
 	}
 }

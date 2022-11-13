@@ -18,7 +18,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-const envKeyPrefix = "Bin_Auto_SW"
+const envKeyPrefix = "BAS_"
 
 type Config struct {
 	filePath string
@@ -144,8 +144,8 @@ func (r *Rule) Run(args []string) {
 	cmdArgsStr := strings.Join(cmdArgs, " ")
 
 	env := dedupEnv(caseInsensitiveEnv, append(os.Environ(), r.Env...))
-	env = append(env, fmt.Sprintf(envKeyPrefix+"_CMD=%s", cmdName))
-	env = append(env, fmt.Sprintf(envKeyPrefix+"_ARGS=%q", cmdArgsStr))
+	env = append(env, fmt.Sprintf(envKeyPrefix+"CMD=%s", cmdName))
+	env = append(env, fmt.Sprintf(envKeyPrefix+"ARGS=%q", cmdArgsStr))
 
 	// signal.Notify(make(chan os.Signal), signalsToIgnore...)
 
@@ -157,7 +157,12 @@ func (r *Rule) Run(args []string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	r.execCmds(ctx, r.Pre, cmdArgsStr, env)
+	noHooks := len(os.Getenv(envKeyPrefix+"NoHook")) != 0
+
+	if !noHooks {
+		r.execCmds(ctx, r.Pre, cmdArgsStr, env)
+	}
+
 	if r.Trace {
 		log.Println(s1 + " Before " + s1)
 		log.Println(s0 + " Main " + s0)
@@ -172,7 +177,9 @@ func (r *Rule) Run(args []string) {
 		log.Println(s1 + " Main " + s1)
 		log.Println(s0 + " After " + s0)
 	}
-	r.execCmds(ctx, r.Post, cmdArgsStr, env)
+	if !noHooks {
+		r.execCmds(ctx, r.Post, cmdArgsStr, env)
+	}
 	if r.Trace {
 		log.Println(s1 + " After " + s1)
 	}

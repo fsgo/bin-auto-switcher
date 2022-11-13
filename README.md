@@ -6,7 +6,7 @@ Auto switch binary in different directories by rules.
 ## 1. Install
 
 ```bash
-go install github.com/fsgo/bin-auto-switcher@main
+go install github.com/fsgo/bin-auto-switcher@latest
 ```
 
 ## 2. Config
