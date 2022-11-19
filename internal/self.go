@@ -27,12 +27,15 @@ SubCommands:
     list:
         list all links
 
+Hooks:
+    with env "BAS_NoHook=true" to disable Pre and Post Hooks
+
 Self-Update :
-          go install github.com/fsgo/bin-auto-switcher@main
+          go install github.com/fsgo/bin-auto-switcher@latest
 
 Site    : https://github.com/fsgo/bin-auto-switcher
 Version : 0.1.4
-Date    : 2022-11-13
+Date    : 2022-11-19
 `
 
 func usage() {

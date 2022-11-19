@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/fsgo/bin-auto-switcher/internal/actuator"
 )
 
 type Command struct {
@@ -72,21 +73,22 @@ func (c *Command) getTimeout() time.Duration {
 func (c *Command) Exec(ctx context.Context, env []string) {
 	ss := strings.Fields(c.Cmd)
 	args := append(ss[1:], c.Args...)
-	cmd := exec.CommandContext(ctx, ss[0], args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Env = env
+
+	co := &actuator.Config{
+		Name: ss[0],
+		Args: args,
+		Env:  env,
+	}
 
 	if c.Trace {
 		var timeout string
 		if dl, ok := ctx.Deadline(); ok {
 			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		log.Println("Exec:", cmd.String(), ", Timeout:", timeout)
+		log.Println("Exec:", co.String(), ", Timeout:", timeout)
 	}
 
-	err := cmd.Run()
+	err := co.Run(ctx)
 	if err == nil {
 		return
 	}
@@ -96,10 +98,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 	}
 	fmt.Fprintln(os.Stderr, ConsoleRed(msg))
 	if !c.AllowFail {
-		exitCode := 1
-		if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() > 0 {
-			exitCode = cmd.ProcessState.ExitCode()
-		}
+		exitCode := co.ExitCode()
 		os.Exit(exitCode)
 	}
 }
