@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -23,7 +24,7 @@ type FindExec struct {
 }
 
 func (fe *FindExec) Name() string {
-	return "find-exec"
+	return Prefix + "find-exec"
 }
 
 func (fe *FindExec) Run(ctx context.Context) error {
@@ -96,8 +97,8 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 
 		s0 := color.GreenString("%3d.", index)
 		s1 := color.CyanString("Dir: %s, MatchFile: %s", dir, fileName)
-		s2 := color.YellowString("Inner-Exec: %s", rr.String())
-		fmt.Println(s0, s1, s2)
+		s2 := color.YellowString("Exec: %s", rr.String())
+		log.Println(s0, s1, s2)
 
 		if e1 := rr.Run(ctx); e1 != nil {
 			fail++
@@ -105,13 +106,17 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 		}
 		return fs.SkipDir
 	})
-
 	if err != nil {
 		return err
 	}
 	if fail > 0 {
-		return fmt.Errorf("total %d tasks failed", fail)
+		return fmt.Errorf("total %d/%d tasks failed", fail, index)
 	}
+
+	if index == 0 {
+		log.Printf("file not found, skipped for %s", cmdName)
+	}
+
 	return nil
 }
 

@@ -20,7 +20,7 @@ type Echo1 struct {
 }
 
 func (e *Echo1) Name() string {
-	return "echo1"
+	return Prefix + "echo1"
 }
 
 func (e *Echo1) Run(ctx context.Context) error {

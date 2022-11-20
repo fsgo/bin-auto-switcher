@@ -36,7 +36,7 @@ or
 
 # default rule
 [[Rules]]
-Cmd = "go1.16.7"           # command, Required
+Cmd = "go1.19.3"           # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
 
@@ -70,12 +70,33 @@ Cmd = "go1.17"
 # go version
 go version go1.17 darwin/amd64
 ```
-actual was executed the `go1.17` command.
-
 -----------
 ②  At other dirs (e.g.: `~/workspace/`):
 ```bash
 # go version
-go version go1.16.7 darwin/amd64
+go version go1.19.3 darwin/amd64
 ```
-actual was executed the `go1.16.7` command.
+
+### 3.2 git hooks
+1. create Symlink for `git`:
+```bash
+bin-auto-switcher ln /usr/local/bin/git git
+```
+
+2. edit config: `~/.config/bin-auto-switcher/git.toml`
+```toml
+[[Rules]]
+Cmd = "/usr/local/bin/git"              
+
+# with env "BAS_NoHook=true" to disable Pre and Post Hooks
+[[Rules.Pre]]               
+Match = "^add\\s"       # when exec "git add" subCommand
+Cond  = ["go_module"]   # condition: in go module dir
+Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
+
+[[Rules.Pre]]               
+Match = "^add\\s"
+Cmd   = "inner:find-exec"
+Args  = ["-name","go.mod","staticcheck","./..."]
+AllowFail = true        # allow cmd fail
+```

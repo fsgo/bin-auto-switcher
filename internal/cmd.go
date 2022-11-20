@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
+
 	"github.com/fsgo/bin-auto-switcher/internal/actuator"
 )
 
@@ -85,7 +87,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		if dl, ok := ctx.Deadline(); ok {
 			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		log.Println("Exec:", co.String(), ", Timeout:", timeout)
+		log.Println("Exec:", color.CyanString(co.String()), ", Timeout:", timeout)
 	}
 
 	err := co.Run(ctx)

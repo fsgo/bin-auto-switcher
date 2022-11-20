@@ -11,6 +11,8 @@ import (
 	"sync/atomic"
 )
 
+const Prefix = "inner:"
+
 type Actuator interface {
 	Name() string
 	Run(ctx context.Context) error
