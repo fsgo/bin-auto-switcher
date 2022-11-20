@@ -35,7 +35,7 @@ Self-Update :
 
 Site    : https://github.com/fsgo/bin-auto-switcher
 Version : 0.1.4
-Date    : 2022-11-19
+Date    : 2022-11-20
 `
 
 func usage() {

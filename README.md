@@ -96,6 +96,8 @@ Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
 
 [[Rules.Pre]]               
 Match = "^add\\s"
+# use inner command 'find-exec' to find filename 'go.mod' 
+# and then exec "staticcheck ./..." in the dir
 Cmd   = "inner:find-exec"
 Args  = ["-name","go.mod","staticcheck","./..."]
 AllowFail = true        # allow cmd fail

@@ -68,6 +68,9 @@ func (fe *FindExec) Run(ctx context.Context) error {
 func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, cmdName string, args []string) error {
 	var index int
 	var fail int
+
+	dirs := map[string]bool{}
+
 	err := filepath.Walk("./", func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -85,9 +88,16 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 		if !match(fileName) {
 			return nil
 		}
-		index++
 
 		dir := filepath.Dir(path)
+		// 一个目录只执行一次命令
+		if dirs[dir] {
+			return nil
+		}
+
+		dirs[dir] = true
+
+		index++
 
 		rr := &Config{
 			Name: cmdName,
