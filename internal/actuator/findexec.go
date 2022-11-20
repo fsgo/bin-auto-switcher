@@ -105,14 +105,18 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 			Dir:  dir,
 		}
 
-		s0 := color.GreenString("%3d.", index)
-		s1 := color.CyanString("Dir: %s, MatchFile: %s", dir, fileName)
-		s2 := color.YellowString("Exec: %s", rr.String())
-		log.Println(s0, s1, s2)
+		if Trace.Load() {
+			s0 := color.GreenString("%3d.", index)
+			s1 := color.CyanString("Dir: %s, MatchFile: %s", dir, fileName)
+			s2 := color.YellowString("Exec: %s", rr.String())
+			log.Println(s0, s1, s2)
+		}
 
 		if e1 := rr.Run(ctx); e1 != nil {
 			fail++
-			color.Red(e1.Error())
+			if Trace.Load() {
+				log.Println(color.RedString(e1.Error()))
+			}
 		}
 		return fs.SkipDir
 	})
@@ -123,7 +127,7 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 		return fmt.Errorf("total %d/%d tasks failed", fail, index)
 	}
 
-	if index == 0 {
+	if index == 0 && Trace.Load() {
 		log.Printf("file not found, skipped for %s", cmdName)
 	}
 

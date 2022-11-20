@@ -34,6 +34,7 @@ func getApp(name string) string {
 }
 
 func execute(name string, args []string) {
+	setLogPrefix("Load")
 	cfg, err := LoadConfig(name)
 	if err != nil {
 		log.Fatalln(err.Error())

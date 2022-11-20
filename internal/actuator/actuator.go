@@ -11,6 +11,9 @@ import (
 	"sync/atomic"
 )
 
+// Trace 是否打印日志
+var Trace = atomic.Bool{}
+
 const Prefix = "inner:"
 
 type Actuator interface {

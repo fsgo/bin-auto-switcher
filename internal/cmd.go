@@ -73,6 +73,8 @@ func (c *Command) getTimeout() time.Duration {
 }
 
 func (c *Command) Exec(ctx context.Context, env []string) {
+	actuator.Trace.Store(c.Trace)
+
 	ss := strings.Fields(c.Cmd)
 	args := append(ss[1:], c.Args...)
 
@@ -87,7 +89,11 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		if dl, ok := ctx.Deadline(); ok {
 			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		log.Println("Exec:", color.CyanString(co.String()), ", Timeout:", timeout)
+		msg := color.MagentaString("Exec: ") + color.CyanString(co.String())
+		if len(timeout) != 0 {
+			msg += ", Timeout:" + timeout
+		}
+		log.Println(msg)
 	}
 
 	err := co.Run(ctx)

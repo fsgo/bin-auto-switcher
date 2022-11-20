@@ -23,7 +23,10 @@ const envKeyPrefix = "BAS_"
 type Config struct {
 	filePath string
 	Rules    []*Rule
-	Trace    bool
+
+	// Trace 是否调试模式，默认 true
+	// 目前只控制是否打印过程日志
+	Trace bool
 }
 
 func (c *Config) Format() error {
@@ -149,11 +152,8 @@ func (r *Rule) Run(args []string) {
 
 	// signal.Notify(make(chan os.Signal), signalsToIgnore...)
 
-	s0 := strings.Repeat("-", 40)
-	s1 := strings.Repeat("=", 40)
-	if r.Trace {
-		log.Println(s0 + " Before " + s0)
-	}
+	setLogPrefix("Before")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -163,33 +163,23 @@ func (r *Rule) Run(args []string) {
 		r.execCmds(ctx, r.Pre, cmdArgsStr, env)
 	}
 
-	if r.Trace {
-		log.Println(s1 + " Before " + s1)
-		log.Println(s0 + " Main " + s0)
-	}
+	setLogPrefix("Main")
+
 	mc := &Command{
 		Cmd:   cmdName,
 		Args:  cmdArgs,
 		Trace: r.Trace,
 	}
 	mc.Exec(ctx, env)
-	if r.Trace {
-		log.Println(s1 + " Main " + s1)
-		log.Println(s0 + " After " + s0)
-	}
+
+	setLogPrefix("After")
 	if !noHooks {
 		r.execCmds(ctx, r.Post, cmdArgsStr, env)
-	}
-	if r.Trace {
-		log.Println(s1 + " After " + s1)
 	}
 	os.Exit(0)
 }
 
 func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, env []string) {
-	if r.Trace {
-		log.Println("Total ", len(cmds))
-	}
 	if len(cmds) == 0 {
 		return
 	}
@@ -216,13 +206,10 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 			break
 		}
 
-		pc.Trace = true
+		pc.Trace = r.Trace
 
 		func() {
 			timeout := pc.getTimeout()
-			if r.Trace {
-				log.Println("Timeout=", timeout.String())
-			}
 			ctx1, cancel := context.WithTimeout(ctx, timeout)
 			defer cancel()
 			pc.Exec(ctx1, env)
@@ -240,7 +227,9 @@ func LoadConfig(name string) (*Config, error) {
 		tpl := cmdTPl(name + "_xxx")
 		return nil, fmt.Errorf("config %q not exists, you can create it like this:\n %s", fp, tpl)
 	}
-	var cfg *Config
+	cfg := &Config{
+		Trace: true,
+	}
 	if _, err := toml.DecodeFile(fp, &cfg); err != nil {
 		return nil, err
 	}
@@ -295,4 +284,12 @@ Cmd = "{CMD}"                  # Required
 
 func cmdTPl(name string) string {
 	return strings.ReplaceAll(configTpl, "{CMD}", name)
+}
+
+func setLogPrefix(msg string) {
+	log.SetPrefix(fmt.Sprintf("%6s | ", msg))
+}
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 }

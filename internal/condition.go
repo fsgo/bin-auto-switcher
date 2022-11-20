@@ -40,7 +40,14 @@ var conditions = map[string]func() bool{
 
 var conditionsFuncs = map[string]func(v string) bool{
 	"has_file": hasFile,
-	"exec":     condExec,
+	"not_has_file": func(v string) bool {
+		return !hasFile(v)
+	},
+	"exec":   condExec,
+	"in_dir": condInDir,
+	"not_in_dir": func(v string) bool {
+		return !condInDir(v)
+	},
 }
 
 func inGoModule() bool {
@@ -81,4 +88,19 @@ func condExec(v string) bool {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stderr
 	return cmd.Run() == nil
+}
+
+func condInDir(v string) bool {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return false
+	}
+	dirs := strings.Fields(v)
+	for i := 0; i < len(dirs); i++ {
+		dir := filepath.Clean(dirs[i]) + string(filepath.Separator)
+		if strings.HasPrefix(dir, pwd) {
+			return true
+		}
+	}
+	return false
 }
