@@ -18,8 +18,6 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-const envKeyPrefix = "BAS_"
-
 type Config struct {
 	filePath string
 	Rules    []*Rule
@@ -147,8 +145,8 @@ func (r *Rule) Run(args []string) {
 	cmdArgsStr := strings.Join(cmdArgs, " ")
 
 	env := dedupEnv(caseInsensitiveEnv, append(os.Environ(), r.Env...))
-	env = append(env, fmt.Sprintf(envKeyPrefix+"CMD=%s", cmdName))
-	env = append(env, fmt.Sprintf(envKeyPrefix+"ARGS=%q", cmdArgsStr))
+	env = append(env, fmt.Sprintf(envKey("CMD")+"=%s", cmdName))
+	env = append(env, fmt.Sprintf(envKey("ARGS")+"=%q", cmdArgsStr))
 
 	// signal.Notify(make(chan os.Signal), signalsToIgnore...)
 
@@ -157,7 +155,7 @@ func (r *Rule) Run(args []string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	noHooks := len(os.Getenv(envKeyPrefix+"NoHook")) != 0
+	noHooks := len(os.Getenv(envKey("NoHook"))) != 0
 
 	if !noHooks {
 		r.execCmds(ctx, r.Pre, cmdArgsStr, env)
@@ -228,7 +226,7 @@ func LoadConfig(name string) (*Config, error) {
 		return nil, fmt.Errorf("config %q not exists, you can create it like this:\n %s", fp, tpl)
 	}
 	cfg := &Config{
-		Trace: true,
+		Trace: os.Getenv(envKey("Trace")) == "true",
 	}
 	if _, err := toml.DecodeFile(fp, &cfg); err != nil {
 		return nil, err
