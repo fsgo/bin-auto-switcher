@@ -18,7 +18,12 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+var enableTrace = os.Getenv(envKey("Trace")) == "true"
+
 type Config struct {
+	// binName 当前命令，如 go、git 等
+	binName string
+
 	filePath string
 	Rules    []*Rule
 
@@ -28,7 +33,17 @@ type Config struct {
 }
 
 func (c *Config) Format() error {
-	for _, r := range c.Rules {
+	var rawBinName string
+	for idx, r := range c.Rules {
+		if len(r.Cmd) == 0 {
+			if len(rawBinName) == 0 {
+				rawBinName = getRawBinName(c.binName)
+				if len(rawBinName) == 0 {
+					return fmt.Errorf("rule[%d].Cmd is empty", idx)
+				}
+			}
+			r.Cmd = rawBinName
+		}
 		if e := r.Format(); e != nil {
 			return e
 		}
@@ -215,28 +230,96 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 	}
 }
 
-func ConfigPath(name string) string {
+func globalConfigPath(name string) string {
 	return filepath.Join(homeDir, ".config", "bin-auto-switcher", name+".toml")
 }
 
-func LoadConfig(name string) (*Config, error) {
-	fp := ConfigPath(name)
-	if _, err := os.Stat(fp); err != nil && os.IsNotExist(err) {
-		tpl := cmdTPl(name + "_xxx")
-		return nil, fmt.Errorf("config %q not exists, you can create it like this:\n %s", fp, tpl)
+func localConfigPath(name string) (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
 	}
-	cfg := &Config{
-		Trace: os.Getenv(envKey("Trace")) == "true",
-	}
-	if _, err := toml.DecodeFile(fp, &cfg); err != nil {
-		return nil, err
-	}
-	if err := cfg.Format(); err != nil {
-		return nil, err
-	}
-	cfg.filePath = fp
+	fn := filepath.Join(".bin-auto-switcher", name+".toml")
 
-	if len(os.Getenv(envKeyPrefix+"_Trace")) != 0 {
+	currentDir := wd
+	for i := 0; i < 128; i++ {
+		fp := filepath.Join(currentDir, fn)
+		ok, err := fileExists(fp)
+		if ok {
+			return fp, nil
+		}
+		if err != nil {
+			return "", err
+		}
+		cd := filepath.Dir(currentDir)
+		if cd == currentDir {
+			break
+		}
+		currentDir = cd
+	}
+	return "", nil
+}
+
+func fileExists(p string) (bool, error) {
+	st, err := os.Stat(p)
+	if err == nil {
+		if st.IsDir() {
+			return false, fmt.Errorf("%q is dir, expect is file", p)
+		}
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func LoadConfig(name string) (*Config, error) {
+	fileName, err := localConfigPath(name)
+	if err != nil {
+		return nil, err
+	}
+	if enableTrace {
+		log.Printf("Local ConfigPath = %q %v\n", fileName, err)
+	}
+
+	if len(fileName) == 0 {
+		fp := globalConfigPath(name)
+		ok, err := fileExists(fp)
+		if enableTrace {
+			log.Printf("Global ConfigPath = %q, exists=%v err=%v\n", fp, ok, err)
+		}
+		if ok {
+			fileName = fp
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cfg := &Config{
+		binName: name,
+		Trace:   enableTrace,
+	}
+
+	if len(fileName) != 0 {
+		if _, err := toml.DecodeFile(fileName, &cfg); err != nil {
+			return nil, err
+		}
+	}
+
+	if len(cfg.Rules) == 0 {
+		defaultRule := &Rule{}
+		cfg.Rules = []*Rule{defaultRule}
+	}
+
+	if err = cfg.Format(); err != nil {
+		return nil, err
+	}
+	cfg.filePath = fileName
+
+	// 最终使用环境变量里的值
+	if enableTrace {
 		cfg.Trace = true
 	}
 
@@ -268,7 +351,7 @@ Cmd = "{CMD}"                  # Required
 # Rules for some dirs
 # [[Rules]]
 # Dir = ["/home/work/dir_1/"]   # Required
-# Cmd = "{CMD}_v1"              # Required
+# Cmd = "{CMD}"              # Required
 # Args = [""]                   # Optional, extra args for command
 # Env = ["k1=v1","k2=v2"]       # Optional, extra env variable for command
 
@@ -281,7 +364,11 @@ Cmd = "{CMD}"                  # Required
 `
 
 func cmdTPl(name string) string {
-	return strings.ReplaceAll(configTpl, "{CMD}", name)
+	rawName := getRawBinName(name)
+	if len(rawName) == 0 {
+		rawName = name
+	}
+	return strings.ReplaceAll(configTpl, "{CMD}", rawName)
 }
 
 func setLogPrefix(msg string) {

@@ -7,6 +7,8 @@ package internal
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -59,4 +61,25 @@ const envKeyPrefix = "BAS_"
 
 func envKey(name string) string {
 	return envKeyPrefix + name
+}
+
+// 尝试从环境变量中找到真正要执行的命令
+func getRawBinName(binName string) string {
+	namePath := "PATH"
+	if isWindows() {
+		namePath = "path"
+	}
+
+	var found int
+	p := os.Getenv(namePath)
+	for _, dir := range filepath.SplitList(p) {
+		p1, err1 := exec.LookPath(filepath.Join(dir, binName))
+		if err1 == nil {
+			found++
+			if found == 2 {
+				return p1
+			}
+		}
+	}
+	return ""
 }

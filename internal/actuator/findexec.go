@@ -27,12 +27,30 @@ func (fe *FindExec) Name() string {
 	return Prefix + "find-exec"
 }
 
+type ss string
+
+func (s ss) Match(name string) bool {
+	arr := strings.Split(string(s), ",")
+	for _, a := range arr {
+		a = strings.TrimSpace(a)
+		if len(a) == 0 {
+			continue
+		}
+		if strings.Contains(name, a) {
+			return true
+		}
+	}
+	return false
+}
+
 func (fe *FindExec) Run(ctx context.Context) error {
 	var name string
 	var useRegular bool
+	var notInDirs string
 	fset := flag.NewFlagSet(fe.Name(), flag.ContinueOnError)
 	fset.StringVar(&name, "name", "go.mod", "find file name")
 	fset.BoolVar(&useRegular, "e", false, "name as regular expression")
+	fset.StringVar(&notInDirs, "dir_not", "", "not in these dir names, multiple are connected with ','")
 	if err := fset.Parse(fe.Args); err != nil {
 		return err
 	}
@@ -51,6 +69,16 @@ func (fe *FindExec) Run(ctx context.Context) error {
 	}
 
 	match := func(fileName string) bool {
+		if len(notInDirs) > 0 {
+			ap, err := filepath.Abs(fileName)
+			if err != nil {
+				log.Printf("filepath.Abs(%q) failed: %v", fileName, err)
+				return false
+			}
+			if ss(notInDirs).Match(ap) {
+				return false
+			}
+		}
 		if useRegular {
 			return reg.MatchString(fileName)
 		}

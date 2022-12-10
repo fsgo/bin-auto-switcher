@@ -40,7 +40,7 @@ func execute(name string, args []string) {
 		log.Fatalln(err.Error())
 	}
 	if cfg.Trace {
-		log.Println("Config:", cfg.filePath)
+		log.Printf("ConfigPath = %q\n", cfg.filePath)
 	}
 	rule, err := cfg.Rule()
 	if err != nil {

@@ -35,8 +35,8 @@ Self-Update :
           go install github.com/fsgo/bin-auto-switcher@latest
 
 Site    : https://github.com/fsgo/bin-auto-switcher
-Version : 0.1.6
-Date    : 2022-11-21
+Version : 0.1.7
+Date    : 2022-12-10
 `
 
 func usage() {
@@ -88,7 +88,8 @@ func cmdLink(target string, linkName string) error {
 	if err = os.Symlink(os.Args[0], lp); err != nil {
 		return err
 	}
-	cp := ConfigPath(linkName)
+
+	cp := globalConfigPath(linkName)
 
 	log.Println("[config]", cp, ", you can edit it.")
 
@@ -103,7 +104,7 @@ func cmdLink(target string, linkName string) error {
 }
 
 func cmdList() error {
-	dir := filepath.Dir(ConfigPath("go"))
+	dir := filepath.Dir(globalConfigPath("go"))
 	ms, err := filepath.Glob(filepath.Join(dir, "*.toml"))
 	if err != nil {
 		return err
