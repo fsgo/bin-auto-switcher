@@ -45,14 +45,14 @@ Cmd = "go.latest"          # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
 
-# [[Rules.Pre]]                # Optional, pre command
-# Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
-# Cmd   = ""                   # Required
-# Args  = [""]                 # Optional
-# AllowFail = true/false       # Optional
-# Timeout = "2m"               # Optional, exec timeout, default 1 min
+# [[Rules.Pre]]            # Optional, pre command
+# Match = ""               # Optional, regexp to match Args. "^add\\s" will match "git add ."
+# Cmd   = ""               # Required
+# Args  = [""]             # Optional
+# AllowFail = true/false   # Optional
+# Timeout = "2m"           # Optional, exec timeout, default 1 min
 
-# [[Rules.Post]]               # Optional, post command
+# [[Rules.Post]]           # Optional, post command
 # Cmd  = ""
 # Args = [""]
 
