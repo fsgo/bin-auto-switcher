@@ -135,7 +135,7 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 
 		if Trace.Load() {
 			s0 := color.GreenString("%3d.", index)
-			s1 := color.CyanString("Dir: %s, MatchFile: %s", dir, fileName)
+			s1 := fmt.Sprintf("Dir: %s, MatchFile: %s", dir, fileName)
 			s2 := color.YellowString("Exec: %s", rr.String())
 			log.Println(s0, s1, s2)
 		}

@@ -84,7 +84,6 @@ func condExec(v string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, arr[0], arr[1:]...)
-	log.Println("cmd=", cmd.String())
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stderr
 	return cmd.Run() == nil

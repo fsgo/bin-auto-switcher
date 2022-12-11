@@ -91,7 +91,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		}
 		msg := color.MagentaString("Exec: ") + color.CyanString(co.String())
 		if len(timeout) != 0 {
-			msg += ", Timeout:" + timeout
+			msg += ", Timeout: " + timeout
 		}
 		log.Println(msg)
 	}

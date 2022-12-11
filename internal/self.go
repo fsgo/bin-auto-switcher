@@ -36,7 +36,7 @@ Self-Update :
 
 Site    : https://github.com/fsgo/bin-auto-switcher
 Version : 0.1.7
-Date    : 2022-12-10
+Date    : 2022-12-11
 `
 
 func usage() {
@@ -86,6 +86,7 @@ func cmdLink(target string, linkName string) error {
 	lp := filepath.Join(filepath.Dir(p), linkName)
 	log.Printf("[link] %s %s\n", os.Args[0], lp)
 	if err = os.Symlink(os.Args[0], lp); err != nil {
+		log.Printf("create Symlink %q failed: %v\n", lp, err)
 		return err
 	}
 
@@ -94,6 +95,7 @@ func cmdLink(target string, linkName string) error {
 	log.Println("[config]", cp, ", you can edit it.")
 
 	if _, err = os.Stat(cp); err == nil {
+		log.Printf("config file %q already exists\n", cp)
 		return nil
 	}
 

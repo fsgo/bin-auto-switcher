@@ -15,7 +15,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/fsgo/fsconf"
 )
 
 var enableTrace = os.Getenv(envKey("Trace")) == "true"
@@ -24,8 +24,10 @@ type Config struct {
 	// binName 当前命令，如 go、git 等
 	binName string
 
-	filePath string
-	Rules    []*Rule
+	// fileName 当前配置对应的配置文件地址
+	fileName string
+
+	Rules []*Rule
 
 	// Trace 是否调试模式，默认 true
 	// 目前只控制是否打印过程日志
@@ -38,9 +40,9 @@ func (c *Config) Format() error {
 		if len(r.Cmd) == 0 {
 			if len(rawBinName) == 0 {
 				rawBinName = getRawBinName(c.binName)
-				if len(rawBinName) == 0 {
-					return fmt.Errorf("rule[%d].Cmd is empty", idx)
-				}
+			}
+			if len(rawBinName) == 0 {
+				return fmt.Errorf("%s rule[%d].Cmd is empty, cannot found %q", c.fileName, idx, c.binName)
 			}
 			r.Cmd = rawBinName
 		}
@@ -219,7 +221,9 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 			break
 		}
 
-		pc.Trace = r.Trace
+		if r.Trace {
+			pc.Trace = r.Trace
+		}
 
 		func() {
 			timeout := pc.getTimeout()
@@ -302,10 +306,15 @@ func LoadConfig(name string) (*Config, error) {
 		Trace:   enableTrace,
 	}
 
+	cfg.fileName = fileName
 	if len(fileName) != 0 {
-		if _, err := toml.DecodeFile(fileName, &cfg); err != nil {
+		if err = fsconf.Parse(fileName, &cfg); err != nil {
 			return nil, err
 		}
+	}
+
+	if cfg.Trace {
+		log.Printf("Using ConfigPath = %q\n", cfg.fileName)
 	}
 
 	if len(cfg.Rules) == 0 {
@@ -316,7 +325,6 @@ func LoadConfig(name string) (*Config, error) {
 	if err = cfg.Format(); err != nil {
 		return nil, err
 	}
-	cfg.filePath = fileName
 
 	// 最终使用环境变量里的值
 	if enableTrace {
@@ -327,13 +335,18 @@ func LoadConfig(name string) (*Config, error) {
 }
 
 var configTpl = `
+# Trace = false                # Optional, print trace log
+
 [[Rules]]
 Cmd = "{CMD}"                  # Required
 # Args = [""]                  # Optional, extra args for command
 # Env = ["k1=v1","k2=v2"]      # Optional, extra env variable for command
+# Trace = false                # Optional, print trace log
 
 # [[Rules.Pre]]                # Optional, pre command
 # Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
+
+# Trace = false                # Optional, print trace log
 
 # Cond Optional, extra conditions
 # eg. "go_module","has_file app.toml", "exec hello.sh"
@@ -341,34 +354,32 @@ Cmd = "{CMD}"                  # Required
 
 # Cmd   = ""                   # Required
 # Args  = [""]                 # Optional
-# AllowFail = true/false       # Optional
+# AllowFail = true/false       # Optional, break when exec failed
 # Timeout = "2m"               # Optional, exec timeout, default 1 min
 
 # [[Rules.Post]]               # Optional, post command
 # Cmd  = ""
 # Args = [""]
 
-# Rules for some dirs
+# Trace = false                # Optional, print trace log
+
+# Rule for some dirs
 # [[Rules]]
 # Dir = ["/home/work/dir_1/"]   # Required
-# Cmd = "{CMD}"              # Required
+# Cmd = "{CMD}"                 # Required
 # Args = [""]                   # Optional, extra args for command
 # Env = ["k1=v1","k2=v2"]       # Optional, extra env variable for command
 
 
-# Rules for other dirs
-#[[Rules]]
-#Dir = ["/home/work/dir_2/"]   # Required
-#Cmd = "{CMD}_v2"              # Required
+# Rule for other dirs
+# [[Rules]]
+# Dir = ["/home/work/dir_2/"]   # Required
+# Cmd = "{CMD}_v2"              # Required
 
 `
 
 func cmdTPl(name string) string {
-	rawName := getRawBinName(name)
-	if len(rawName) == 0 {
-		rawName = name
-	}
-	return strings.ReplaceAll(configTpl, "{CMD}", rawName)
+	return strings.ReplaceAll(configTpl, "{CMD}", name)
 }
 
 func setLogPrefix(msg string) {

@@ -5,12 +5,16 @@
 package internal
 
 import (
+	"debug/buildinfo"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
+	"sync"
 )
 
 func isWindows() bool {
@@ -63,23 +67,42 @@ func envKey(name string) string {
 	return envKeyPrefix + name
 }
 
+var rawBinNames sync.Map
+
 // 尝试从环境变量中找到真正要执行的命令
 func getRawBinName(binName string) string {
+	v, ok := rawBinNames.Load(binName)
+	if ok {
+		return v.(string)
+	}
+
 	namePath := "PATH"
 	if isWindows() {
 		namePath = "path"
 	}
-
-	var found int
 	p := os.Getenv(namePath)
 	for _, dir := range filepath.SplitList(p) {
 		p1, err1 := exec.LookPath(filepath.Join(dir, binName))
-		if err1 == nil {
-			found++
-			if found == 2 {
-				return p1
+		if err1 == nil && !isSelfBin(p1) {
+			rawBinNames.Store(binName, p1)
+			if enableTrace {
+				log.Println("RawBinName:", p1)
 			}
+			return p1
 		}
 	}
+	rawBinNames.Store(binName, "")
 	return ""
+}
+
+func isSelfBin(p string) bool {
+	info, err := buildinfo.ReadFile(p)
+	if err != nil {
+		return false
+	}
+	main, ok := debug.ReadBuildInfo()
+	if !ok {
+		return false
+	}
+	return info.Path == main.Path
 }

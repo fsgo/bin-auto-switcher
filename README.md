@@ -1,7 +1,7 @@
 # Bin-Auto-Switcher
 
-Auto switch binary in different directories by rules.  
-
+1. Auto switch binary in different directories by rules.  
+2. Add pre- and post- Hooks.
 
 ## 1. Install
 
@@ -10,7 +10,12 @@ go install github.com/fsgo/bin-auto-switcher@latest
 ```
 
 ## 2. Config
-config file:
+Local Config File（1st priority）:
+```
+{CurrentDir}/.bin-auto-switcher/{cmd}.toml
+```
+
+Global Config File（2nd priority）:
 ```
 ~/.config/bin-auto-switcher/{cmd}.toml
 ```
@@ -21,7 +26,7 @@ you should already [install multiple Go versions](https://github.com/fsgo/smart-
 
 #### 1.create Symlink for `go`:
 ```bash
-bin-auto-switcher ln go1.16.7 go
+bin-auto-switcher ln go.latest go
 ```
 
 or
@@ -34,9 +39,9 @@ or
 ```toml
 # config for 'go' command
 
-# default rule
+# 1th is the default rule
 [[Rules]]
-Cmd = "go1.19.3"           # command, Required
+Cmd = "go.latest"          # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
 
@@ -53,8 +58,9 @@ Cmd = "go1.19.3"           # command, Required
 
 # rule for some dir
 [[Rules]]
+# when in these dirs, this rule can be match
 Dir = ["~/workspace/fsgo/myserver"]
-Cmd = "go1.17"
+Cmd = "go1.19"
 
 # rule for other dir
 # [[Rules]]
@@ -102,3 +108,41 @@ Cmd   = "inner:find-exec"
 Args  = ["-name","go.mod","staticcheck","./..."]
 AllowFail = true        # allow cmd fail
 ```
+
+### 3.3 inner:find-exec
+find a filename and exec another Command in this dir
+```bash
+Usage of find-exec:
+  -e	name as regular expression( default false)
+  -name string
+    	find file name (default "go.mod")
+  -dir_not string
+    	not in these dir names, multiple are connected with ','"
+```
+
+Examples:
+```
+# exec: gorgeous (https://github.com/fsgo/go_fmt)
+inner:find-exec -name go.mod gorgeous
+
+# exec: staticcheck ./...
+inner:find-exec -name go.mod staticcheck ./...
+```
+
+### 3.4 Condition
+When `Cond` success, exec `Cmd`.
+```toml
+[[Rules.Pre]]               
+Match = "^add\\s"       # when exec "git add" subCommand
+Cond  = ["go_module"]   # condition: in go module dir
+Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
+```
+| Condition                   | Note                                                    |
+|-----------------------------|---------------------------------------------------------|
+| `go_module`                 | in Go module dir, with a file named "go.mod"            |
+| `has_file` xyz              | in some dir with a file named "xyz"                     | 
+| `not_has_file` xyz          | in a dir without a file named "xyz"                     | 
+| `not_has_file` xyz          | in a dir without a file named "xyz"                     | 
+| `exec` xyz.sh               | in a dir without a file named "xyz.sh" and exec success | 
+| `in_dir` xyz/abc [dir2]     | in "xyz/abc" dir or in "dir2"                           | 
+| `not_in_dir` xyz/abc [dir2] | not in "xyz/abc" and "dir2" dir                         | 
