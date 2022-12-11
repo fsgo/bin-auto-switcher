@@ -4,12 +4,12 @@ go 1.19
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/fsgo/fsconf v0.2.6
+	github.com/fsgo/fsconf v0.2.7
+	github.com/fsgo/fsenv v0.3.2
 )
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/fsgo/fsenv v0.3.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect

@@ -8,6 +8,8 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+
+	"github.com/fsgo/fsenv"
 )
 
 const selfBinName = "bin-auto-switcher"
@@ -16,6 +18,8 @@ func Execute(args []string) {
 	if len(args) == 0 {
 		panic("min args is 1, got 0")
 	}
+	setup()
+
 	app := getApp(filepath.Base(args[0]))
 
 	if app == selfBinName || strings.HasPrefix(app, selfBinName) {
@@ -24,6 +28,11 @@ func Execute(args []string) {
 	}
 
 	execute(app, args[1:])
+}
+
+func setup() {
+	fsenv.SetConfRootDir(configDir())
+	fsenv.SetRootDir(filepath.Join(configDir(), "app_data"))
 }
 
 func getApp(name string) string {

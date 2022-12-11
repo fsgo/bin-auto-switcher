@@ -234,8 +234,12 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 	}
 }
 
+func configDir() string {
+	return filepath.Join(homeDir, ".config", "bin-auto-switcher")
+}
+
 func globalConfigPath(name string) string {
-	return filepath.Join(homeDir, ".config", "bin-auto-switcher", name+".toml")
+	return filepath.Join(configDir(), name+".toml")
 }
 
 func localConfigPath(name string) (string, error) {
