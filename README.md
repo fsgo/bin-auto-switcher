@@ -137,12 +137,12 @@ Match = "^add\\s"       # when exec "git add" subCommand
 Cond  = ["go_module"]   # condition: in go module dir
 Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
 ```
-| Condition                   | Note                                                    |
-|-----------------------------|---------------------------------------------------------|
-| `go_module`                 | in Go module dir, with a file named "go.mod"            |
-| `has_file` xyz              | in some dir with a file named "xyz"                     | 
-| `not_has_file` xyz          | in a dir without a file named "xyz"                     | 
-| `not_has_file` xyz          | in a dir without a file named "xyz"                     | 
-| `exec` xyz.sh               | in a dir without a file named "xyz.sh" and exec success | 
-| `in_dir` xyz/abc [dir2]     | in "xyz/abc" dir or in "dir2"                           | 
-| `not_in_dir` xyz/abc [dir2] | not in "xyz/abc" and "dir2" dir                         | 
+| Condition                   | Note                                                        |
+|-----------------------------|-------------------------------------------------------------|
+| `go_module`                 | in Go module dir, with a file named "go.mod"                |
+| `has_file` xyz              | in some dirs with a file named "xyz"                        | 
+| `not_has_file` xyz          | in some dirs without a file named "xyz"                     | 
+| `not_has_file` xyz          | in some dirs without a file named "xyz"                     | 
+| `exec` xyz.sh               | in some dirs without a file named "xyz.sh" and exec success | 
+| `in_dir` xyz/abc [dir2]     | in "xyz/abc" dir or in "dir2"                               | 
+| `not_in_dir` xyz/abc [dir2] | not in "xyz/abc" and "dir2" dir                             | 
