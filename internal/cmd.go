@@ -44,6 +44,9 @@ type Command struct {
 	// AllowFail 是否允许执行失败，默认否
 	// 默认情况下，当此命令执行失败后，后续命令也不会执行，程序将退出
 	AllowFail bool
+
+	// Env 执行此命令所特有的环境变量信息
+	Env []string
 }
 
 func (c *Command) IsMatch(str string) (bool, error) {
@@ -72,11 +75,16 @@ func (c *Command) getTimeout() time.Duration {
 	return time.Minute
 }
 
+// Exec 执行命令
+// env 变量已经包含了 os.Environ()
 func (c *Command) Exec(ctx context.Context, env []string) {
 	actuator.Trace.Store(c.Trace)
 
 	ss := strings.Fields(c.Cmd)
 	args := append(ss[1:], c.Args...)
+
+	// 将当前命令所特有的环境变量放在最后：覆盖之前的值
+	env = dedupEnv(caseInsensitiveEnv, append(env, c.Env...))
 
 	co := &actuator.Config{
 		Name: ss[0],

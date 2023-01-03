@@ -94,10 +94,14 @@ func condInDir(v string) bool {
 	if err != nil {
 		return false
 	}
-	dirs := strings.Fields(v)
+	dirs := strings.Split(v, ";")
 	for i := 0; i < len(dirs); i++ {
-		dir := filepath.Clean(dirs[i]) + string(filepath.Separator)
-		if strings.HasPrefix(dir, pwd) {
+		dir := strings.TrimSpace(dirs[i])
+		if dir == "" {
+			continue
+		}
+		dir = filepath.Clean(dir) + string(filepath.Separator)
+		if strings.HasPrefix(pwd, dir) {
 			return true
 		}
 	}

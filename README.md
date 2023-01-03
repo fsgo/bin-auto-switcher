@@ -49,6 +49,7 @@ Cmd = "go.latest"          # command, Required
 # Match = ""               # Optional, regexp to match Args. "^add\\s" will match "git add ."
 # Cmd   = ""               # Required
 # Args  = [""]             # Optional
+# Env =["k3=v3","k2=v2"]   # extra env variable, Optional
 # AllowFail = true/false   # Optional
 # Timeout = "2m"           # Optional, exec timeout, default 1 min
 
