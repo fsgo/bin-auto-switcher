@@ -23,6 +23,7 @@ import (
 type FindExec struct {
 	Args     []string
 	flagName string
+	wd       string
 }
 
 func (fe *FindExec) Name() string {
@@ -46,6 +47,12 @@ func (s ss) Match(name string) bool {
 }
 
 func (fe *FindExec) Run(ctx context.Context) error {
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fe.wd = wd
+
 	var useRegular bool
 	var notInDirs string
 	var rootDir string
@@ -99,7 +106,11 @@ func (fe *FindExec) Run(ctx context.Context) error {
 	}
 
 	if Trace.Load() {
-		log.Println("FindRootDir:", rd)
+		rl, err := filepath.Rel(fe.wd, rd)
+		if err == nil {
+			rl += string(filepath.Separator)
+		}
+		log.Println("FindRootDir:", rl, ", Rel.err:", err)
 	}
 
 	return fe.run(ctx, rd, match, cmdName, fset.Args()[1:])
@@ -110,10 +121,7 @@ func (fe *FindExec) findRootDir(names []string) (string, error) {
 	if len(names) == 0 {
 		return "./", nil
 	}
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
+	wd := fe.wd
 
 	hasFile := func() bool {
 		for _, name := range names {
@@ -180,7 +188,8 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 
 		if Trace.Load() {
 			s0 := color.GreenString("%3d.", index)
-			s1 := fmt.Sprintf("Dir: %s, MatchFile: %s", dir, fileName)
+			rl, _ := filepath.Rel(fe.wd, dir)
+			s1 := fmt.Sprintf("Dir: %s, MatchFile: %s", rl, fileName)
 			s2 := color.YellowString("Exec: %s", rr.String())
 			log.Println(s0, s1, s2)
 		}

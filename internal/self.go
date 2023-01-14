@@ -35,9 +35,8 @@ Self-Update :
           go install github.com/fsgo/bin-auto-switcher@latest
 
 Site    : https://github.com/fsgo/bin-auto-switcher
-Version : 0.1.7
-Date    : 2022-12-11
-`
+Version : ` + version + `
+Date    : ` + versionDate
 
 func usage() {
 	out := flag.CommandLine.Output()
