@@ -93,18 +93,25 @@ bin-auto-switcher ln /usr/local/bin/git git
 2. edit config: `~/.config/bin-auto-switcher/git.toml`
 ```toml
 [[Rules]]
-Cmd = "/usr/local/bin/git"              
+Cmd = "/usr/local/bin/git"    # the raw Cmd Path, or empty it will auto detect
 
 # with env "BAS_NoHook=true" to disable Pre and Post Hooks
+
+[[Rules.Pre]]
+Match = "^add\\s" # when exec "git add" subCommand
+Trace = true
+# find pre-ci.sh and execute it if exists
+Cmd   = "inner:find-exec"
+Args  = ["-name","pre-ci.sh","bash","pre-ci.sh"]
+
 [[Rules.Pre]]               
-Match = "^add\\s"       # when exec "git add" subCommand
+Match = "^add\\s"       
 Cond  = ["go_module"]   # condition: in go module dir
 Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
 
 [[Rules.Pre]]               
 Match = "^add\\s"
-# use inner command 'find-exec' to find filename 'go.mod' 
-# and then exec "staticcheck ./..." in the dir
+# find file "go.mod" and exec "staticcheck ./..." in the dir
 Cmd   = "inner:find-exec"
 Args  = ["-name","go.mod","staticcheck","./..."]
 AllowFail = true        # allow cmd fail
@@ -114,11 +121,13 @@ AllowFail = true        # allow cmd fail
 find a filename and exec another Command in this dir
 ```bash
 Usage of find-exec:
-  -e	name as regular expression( default false)
+  -root string
+       search up root dir(default "go.mod,.git")
   -name string
     	find file name (default "go.mod")
+  -e	name as regular expression( default false)
   -dir_not string
-    	not in these dir names, multiple are connected with ','"
+    	not in these dir names, multiple are connected with ","
 ```
 
 Examples:

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -20,7 +21,8 @@ import (
 
 // FindExec 查找指定文件名，名在其目录下执行执行子命令
 type FindExec struct {
-	Args []string
+	Args     []string
+	flagName string
 }
 
 func (fe *FindExec) Name() string {
@@ -44,26 +46,27 @@ func (s ss) Match(name string) bool {
 }
 
 func (fe *FindExec) Run(ctx context.Context) error {
-	var name string
 	var useRegular bool
 	var notInDirs string
+	var rootDir string
 	fset := flag.NewFlagSet(fe.Name(), flag.ContinueOnError)
-	fset.StringVar(&name, "name", "go.mod", "find file name")
+	fset.StringVar(&rootDir, "root", ".git,go.mod", "search up root dir")
+	fset.StringVar(&fe.flagName, "name", "go.mod", "find file name")
 	fset.BoolVar(&useRegular, "e", false, "name as regular expression")
 	fset.StringVar(&notInDirs, "dir_not", "", "not in these dir names, multiple are connected with ','")
 	if err := fset.Parse(fe.Args); err != nil {
 		return err
 	}
 
-	if len(name) == 0 {
+	if len(fe.flagName) == 0 {
 		return errors.New("-name is empty")
 	}
 
 	var reg *regexp.Regexp
 	if useRegular {
-		r, err := regexp.Compile(name)
+		r, err := regexp.Compile(fe.flagName)
 		if err != nil {
-			return fmt.Errorf("regexp.Compile(%q): %v", name, err)
+			return fmt.Errorf("regexp.Compile(%q): %v", fe.flagName, err)
 		}
 		reg = r
 	}
@@ -82,7 +85,7 @@ func (fe *FindExec) Run(ctx context.Context) error {
 		if useRegular {
 			return reg.MatchString(fileName)
 		}
-		return fileName == name
+		return fileName == fe.flagName
 	}
 
 	cmdName := fset.Arg(0)
@@ -90,16 +93,58 @@ func (fe *FindExec) Run(ctx context.Context) error {
 		return errors.New("cmd is empty")
 	}
 
-	return fe.run(ctx, match, cmdName, fset.Args()[1:])
+	rd, err := fe.findRootDir(strings.Split(rootDir, ","))
+	if err != nil {
+		return err
+	}
+
+	if Trace.Load() {
+		log.Println("FindRootDir:", rd)
+	}
+
+	return fe.run(ctx, rd, match, cmdName, fset.Args()[1:])
 }
 
-func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, cmdName string, args []string) error {
+func (fe *FindExec) findRootDir(names []string) (string, error) {
+	names = stringsTrim(names)
+	if len(names) == 0 {
+		return "./", nil
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	hasFile := func() bool {
+		for _, name := range names {
+			_, err := os.Stat(filepath.Join(wd, name))
+			if err == nil {
+				return true
+			}
+		}
+		return false
+	}
+
+	for i := 0; i < 128; i++ {
+		if hasFile() {
+			return wd, nil
+		}
+		wdn := filepath.Dir(wd)
+		if wdn == wd {
+			return wd, nil
+		}
+		wd = wdn
+	}
+	return "./", nil
+}
+
+func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName string) bool, cmdName string, args []string) error {
 	var index int
 	var fail int
 
 	dirs := map[string]bool{}
 
-	err := filepath.Walk("./", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(rootDir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -156,7 +201,7 @@ func (fe *FindExec) run(ctx context.Context, match func(fileName string) bool, c
 	}
 
 	if index == 0 && Trace.Load() {
-		log.Printf("file not found, skipped for %s", cmdName)
+		log.Printf("file %q not found, skipped", fe.flagName)
 	}
 
 	return nil
