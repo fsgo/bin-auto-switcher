@@ -154,5 +154,5 @@ Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
 | `not_has_file` xyz          | in some dirs without a file named "xyz"                     | 
 | `not_has_file` xyz          | in some dirs without a file named "xyz"                     | 
 | `exec` xyz.sh               | in some dirs without a file named "xyz.sh" and exec success | 
-| `in_dir` xyz/abc [dir2]     | in "xyz/abc" dir or in "dir2"                               | 
-| `not_in_dir` xyz/abc [dir2] | not in "xyz/abc" and "dir2" dir                             | 
+| `in_dir` xyz/abc[;dir2]     | in "xyz/abc" dir or in "dir2"                               | 
+| `not_in_dir` xyz/abc[;dir2] | not in "xyz/abc" and "dir2" dir                             | 
