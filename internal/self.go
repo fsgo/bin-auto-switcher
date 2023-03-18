@@ -16,23 +16,29 @@ import (
 )
 
 var helpMessage = `
-bin-auto-switcher subCommand [options]
+{SelfName} subCommand [options]
 
 SubCommands:
     ln {target} {link_name} :
         Like GNU's 'ln' command, create link {link_name} from {target},
-        The config file is '~/.config/bin-auto-switcher/{link_name}.toml'.
+        The global config file is '~/.config/bin-auto-switcher/{link_name}.toml'.
         eg: "bin-auto-switcher ln go1.19.3 go"
 
     list:
-        list all links
+        list all links/configs
+
+    info {name}:
+         output information about {name}
+
+    init-conf {name}:
+         create global config file for {name} if not exists
 
 Env Vars:
     1. with BAS_NoHook=true to disable Pre and Post Hooks
     2. with BAS_Trace=true to enable trace logs
 
 Self-Update :
-          go install github.com/fsgo/bin-auto-switcher@latest
+          go install github.com/fsgo/bin-auto-switcher/bas@latest
 
 Site    : https://github.com/fsgo/bin-auto-switcher
 Version : ` + version + `
@@ -41,7 +47,9 @@ Date    : ` + versionDate
 func usage() {
 	out := flag.CommandLine.Output()
 	fmt.Fprintf(out, "Usage of %s:\n", filepath.Base(os.Args[0]))
-	fmt.Fprintf(out, strings.TrimSpace(helpMessage)+"\n")
+
+	str := strings.ReplaceAll(helpMessage, "{SelfName}", os.Args[0])
+	fmt.Fprintf(out, strings.TrimSpace(str)+"\n")
 }
 
 func executeSelf(args stringSlice) {
@@ -56,8 +64,14 @@ func executeSelf(args stringSlice) {
 		err = cmdLink(args.get(1), args.get(2))
 	case "list":
 		err = cmdList()
+	case "info":
+		err = info(args.get(1))
+	case "init-conf":
+		err = initConf(args.get(1))
 	default:
-		err = fmt.Errorf("not support %q", cmd)
+		// eval 方式执行其他命令：
+		// bin-auth-switcher git st
+		execute(cmd, args[1:])
 	}
 
 	if err != nil {
@@ -129,4 +143,25 @@ func (s stringSlice) get(index int) string {
 		return ""
 	}
 	return s[index]
+}
+
+func info(cmd string) error {
+	_, err := LoadConfig(cmd)
+	return err
+}
+
+// 创建全局配置文件
+func initConf(cmd string) error {
+	fp := globalConfigPath(cmd)
+	_, err := os.Stat(fp)
+	if err == nil {
+		log.Printf("%s already exists, skipped\n", fp)
+		return nil
+	}
+
+	dir := filepath.Dir(fp)
+	_ = os.MkdirAll(dir, 0777)
+	err = os.WriteFile(fp, []byte(cmdTPl("")), 0644)
+	log.Println("create global config:", fp, "write:", err)
+	return err
 }

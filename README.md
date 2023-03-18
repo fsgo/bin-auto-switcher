@@ -1,18 +1,18 @@
 # Bin-Auto-Switcher
 
-1. Auto switch binary in different directories by rules.  
-2. Add pre- and post- Hooks.
+1. Auto switch binary in different directories by rules. 
+2. Execute pre-hooks and post-hooks.
 
 ## 1. Install
 
 ```bash
-go install github.com/fsgo/bin-auto-switcher@latest
+go install github.com/fsgo/bin-auto-switcher/bas@latest
 ```
 
 ## 2. Config
 Local Config File（1st priority）:
 ```
-{CurrentDir}/.bin-auto-switcher/{cmd}.toml
+{CurrentDir}/.bas/{cmd}.toml
 ```
 
 Global Config File（2nd priority）:
@@ -26,14 +26,14 @@ you should already [install multiple Go versions](https://github.com/fsgo/smart-
 
 #### 1.create Symlink for `go`:
 ```bash
-bin-auto-switcher ln go.latest go
+bas ln go.latest go
 ```
 
 or
 
 ```bash
 # cd ~/go/bin/
-# ln -s bin-auto-switcher go
+# ln -s bas go
 ```
 #### 2. edit config file `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
 ```toml
@@ -62,15 +62,9 @@ Cmd = "go.latest"          # command, Required
 # when in these dirs, this rule can be match
 Dir = ["~/workspace/fsgo/myserver"]
 Cmd = "go1.19"
-
-# rule for other dir
-# [[Rules]]
-# Dir = ["~/workspace/job"]
-# Cmd = "go1.18"
 ```
 
 #### 3. Check It:
-
 ----------
 ① At  `~/workspace/fsgo/myserver`: 
 ```bash
@@ -87,7 +81,7 @@ go version go1.19.3 darwin/amd64
 ### 3.2 git hooks
 1. create Symlink for `git`:
 ```bash
-bin-auto-switcher ln /usr/local/bin/git git
+bas ln /usr/local/bin/git git
 ```
 
 2. edit config: `~/.config/bin-auto-switcher/git.toml`
@@ -156,3 +150,12 @@ Cmd   = "gorgeous"      # https://github.com/fsgo/go_fmt
 | `exec` xyz.sh               | in some dirs without a file named "xyz.sh" and exec success | 
 | `in_dir` xyz/abc[;dir2]     | in "xyz/abc" dir or in "dir2"                               | 
 | `not_in_dir` xyz/abc[;dir2] | not in "xyz/abc" and "dir2" dir                             | 
+
+
+### 3.5 Eval
+eval command without links.
+```bash
+bas git st
+```
+it will eval `git st` command and also execute pre-hooks and post-hooks which defined
+in `~/.config/bin-auto-switcher/git.toml`.

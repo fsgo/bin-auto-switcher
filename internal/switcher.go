@@ -12,7 +12,10 @@ import (
 	"github.com/fsgo/fsenv"
 )
 
-const selfBinName = "bin-auto-switcher"
+const (
+	selfBinName      = "bin-auto-switcher"
+	selfBinNameShort = "bas"
+)
 
 func Execute(args []string) {
 	if len(args) == 0 {
@@ -22,7 +25,7 @@ func Execute(args []string) {
 
 	app := getApp(filepath.Base(args[0]))
 
-	if app == selfBinName || strings.HasPrefix(app, selfBinName) {
+	if app == selfBinName || app == selfBinNameShort {
 		executeSelf(args[1:])
 		return
 	}

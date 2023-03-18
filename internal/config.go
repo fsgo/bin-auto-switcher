@@ -247,22 +247,28 @@ func localConfigPath(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fn := filepath.Join(".bin-auto-switcher", name+".toml")
+	fns := []string{
+		filepath.Join(".bas", name+".toml"),
+		filepath.Join(".bin-auto-switcher", name+".toml"),
+	}
 
 	currentDir := wd
 	for i := 0; i < 128; i++ {
-		fp := filepath.Join(currentDir, fn)
-		ok, err := fileExists(fp)
-		if ok {
-			return fp, nil
-		}
-		if err != nil {
-			return "", err
+		for _, fn := range fns {
+			fp := filepath.Join(currentDir, fn)
+			ok, err := fileExists(fp)
+			if ok {
+				return fp, nil
+			}
+			if err != nil {
+				return "", err
+			}
 		}
 		cd := filepath.Dir(currentDir)
 		if cd == currentDir {
 			break
 		}
+
 		currentDir = cd
 	}
 	return "", nil
@@ -342,14 +348,14 @@ var configTpl = `
 # Trace = false                # Optional, print trace log
 
 [[Rules]]
-Cmd = "{CMD}"                  # Required
+Cmd = "{CMD}"                  # Optional
 # Args = [""]                  # Optional, extra args for command
 # Env = ["k1=v1","k2=v2"]      # Optional, extra env variable for command
 # Trace = false                # Optional, print trace log
 
-# [[Rules.Pre]]                # Optional, pre command
-# Match = ""                   # Optional, regexp to match Args,eg "^add\\s" will match "git add ."
-
+# -----------------------------------------------------------------------------
+# [[Rules.Pre]]                # Optional, prepare hook command
+# Match = ""                   # Optional, regexp for args, eg "^add\\s" for "git add ."
 # Trace = false                # Optional, print trace log
 
 # Cond Optional, extra conditions
@@ -360,30 +366,27 @@ Cmd = "{CMD}"                  # Required
 # Args  = [""]                 # Optional
 # AllowFail = true/false       # Optional, break when exec failed
 # Timeout = "2m"               # Optional, exec timeout, default 1 min
-
-# [[Rules.Post]]               # Optional, post command
+# -----------------------------------------------------------------------------
+# [[Rules.Post]]               # Optional, post hook command，same as Rules.Pre
 # Cmd  = ""
 # Args = [""]
+# -----------------------------------------------------------------------------
 
-# Trace = false                # Optional, print trace log
-
+# =============================================================================
 # Rule for some dirs
+# =============================================================================
 # [[Rules]]
 # Dir = ["/home/work/dir_1/"]   # Required
-# Cmd = "{CMD}"                 # Required
+# Cmd = "{CMD}"                 # Optional
 # Args = [""]                   # Optional, extra args for command
 # Env = ["k1=v1","k2=v2"]       # Optional, extra env variable for command
-
-
-# Rule for other dirs
-# [[Rules]]
-# Dir = ["/home/work/dir_2/"]   # Required
-# Cmd = "{CMD}_v2"              # Required
-
+# ============================================================================
 `
 
 func cmdTPl(name string) string {
-	return strings.ReplaceAll(configTpl, "{CMD}", name)
+	str := strings.ReplaceAll(configTpl, "{CMD}", name)
+	str = strings.TrimSpace(str) + "\n"
+	return str
 }
 
 func setLogPrefix(msg string) {
