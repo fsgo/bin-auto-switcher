@@ -24,7 +24,14 @@ Global Config File（2nd priority）:
 ### 3.1 Auto Switch Go versions
 you should already [install multiple Go versions](https://github.com/fsgo/smart-go-dl)
 
-#### 1.create Symlink for `go`:
+#### 1.create alias or symlink for `go`:
+```bash
+alias go="bas go"
+```
+save it to ~/.zshrc（or ~/.bashrc）
+
+or
+
 ```bash
 bas ln go.latest go
 ```
@@ -32,9 +39,11 @@ bas ln go.latest go
 or
 
 ```bash
-# cd ~/go/bin/
-# ln -s bas go
+cd ~/go/bin/
+ln -s bas go
 ```
+
+
 #### 2. edit config file `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
 ```toml
 # config for 'go' command
