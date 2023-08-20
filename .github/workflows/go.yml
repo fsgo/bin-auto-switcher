@@ -19,10 +19,10 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Build
-      run: go build -v
+      run: cd bas && go build -v
 
     - name: Test
-      run: go test -v ./...
+      run: go test -race -v ./...
 
     - name: gorgeous style check
       run: go install github.com/fsgo/go_fmt/cmd/gorgeous@latest && gorgeous -d ./...
