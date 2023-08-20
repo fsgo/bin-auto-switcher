@@ -352,7 +352,9 @@ func LoadConfig(name string) (*Config, error) {
 }
 
 var configTpl = `
-# Trace = false                # Optional, print trace log
+# Optional, enable print trace log
+# or with env "BAS_Trace=true" to enable it
+# Trace = false
 
 [[Rules]]
 Cmd = "{CMD}"                  # Optional
@@ -361,20 +363,23 @@ Cmd = "{CMD}"                  # Optional
 # Trace = false                # Optional, print trace log
 
 # -----------------------------------------------------------------------------
+# with env "BAS_NoHook=true" to disable Pre and Post Hooks
+#
 # [[Rules.Pre]]                # Optional, prepare hook command
 # Match = ""                   # Optional, regexp for args, eg "^add\\s" for "git add ."
 # Trace = false                # Optional, print trace log
 
 # Cond Optional, extra conditions
-# eg. "go_module","has_file app.toml", "exec hello.sh"
+# e.g. "go_module","has_file app.toml", "exec hello.sh"
 # Cond  = [""]                
 
 # Cmd   = ""                   # Required
 # Args  = [""]                 # Optional
 # AllowFail = true/false       # Optional, break when exec failed
 # Timeout = "2m"               # Optional, exec timeout, default 1 min
+#
 # -----------------------------------------------------------------------------
-# [[Rules.Post]]               # Optional, post hook command，same as Rules.Pre
+# [[Rules.Post]]               # Optional, Post hook command，same as Rules.Pre
 # Cmd  = ""
 # Args = [""]
 # -----------------------------------------------------------------------------

@@ -23,7 +23,7 @@ SubCommands:
     ln {target} {link_name} :
         Like GNU's 'ln' command, create link {link_name} from {target},
         The global config file is '~/.config/bas/{link_name}.toml'.
-        eg: "bin-auto-switcher ln go1.19.3 go"
+        e.g.: "bas ln go1.19.3 go"
 
     list:
         list all links/configs
