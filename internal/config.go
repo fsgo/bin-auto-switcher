@@ -272,35 +272,12 @@ func globalConfigPath(name string) string {
 }
 
 func localConfigPath(name string) (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
+	fp := filepath.Join(".bas", name+".toml")
+	np, err := findFileUpper(fp, 128)
+	if err != nil && errors.Is(err, errFileNotFound) {
+		return "", nil
 	}
-	fns := []string{
-		filepath.Join(".bas", name+".toml"),
-		filepath.Join(".bin-auto-switcher", name+".toml"),
-	}
-
-	currentDir := wd
-	for i := 0; i < 128; i++ {
-		for _, fn := range fns {
-			fp := filepath.Join(currentDir, fn)
-			ok, err := fileExists(fp)
-			if ok {
-				return fp, nil
-			}
-			if err != nil {
-				return "", err
-			}
-		}
-		cd := filepath.Dir(currentDir)
-		if cd == currentDir {
-			break
-		}
-
-		currentDir = cd
-	}
-	return "", nil
+	return np, err
 }
 
 func fileExists(p string) (bool, error) {

@@ -49,14 +49,14 @@ func execute(name string, args []string) {
 	setLogPrefix("Load")
 	cfg, err := LoadConfig(name)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("LoadConfig failed:", err)
 	}
 	rule, err := cfg.Rule()
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("Pick Rule failed:", err)
 	}
 	if err = rule.BeforeExec(name); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("BeforeExec failed:", err)
 	}
 	rule.Run(args)
 }

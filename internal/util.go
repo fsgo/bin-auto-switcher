@@ -5,7 +5,6 @@
 package internal
 
 import (
-	"archive/tar"
 	"debug/buildinfo"
 	"encoding/json"
 	"errors"
@@ -140,7 +139,7 @@ func findFileUpper(name string, max int) (string, error) {
 		}
 		current = next
 	}
-	return "", fmt.Errorf("%w: %s", tar.ErrFieldTooLong, name)
+	return "", fmt.Errorf("%w: %s", errFileNotFound, name)
 }
 
 func parserGoModFile(fp string) (*modfile.File, error) {
