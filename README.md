@@ -10,23 +10,13 @@ go install github.com/fsgo/bin-auto-switcher/bas@latest
 ```
 
 ## 2. Config
-Local Config File:
-```
-{CurrentDir}/.bas/{cmd}.toml
-```
+`{CurrentDir}/.bas/{cmd}.toml` or `~/.config/bas/{cmd}.toml`
 
 ## 3. Example
 ### 3.1 Auto Switch Go versions
 you should already [install multiple Go versions](https://github.com/fsgo/smart-go-dl)
 
 #### 1.create alias or symlink for `go`:
-```bash
-alias go="bas go"
-```
-save it to ~/.zshrc（or ~/.bashrc）
-
-or
-
 ```bash
 bas ln go.latest go
 ```
@@ -172,4 +162,4 @@ eval command without links.
 bas git st
 ```
 it will eval `git st` command and also execute pre-hooks and post-hooks which defined
-in `~/.config/bas/git.toml`.
+in config file （e.g. `~/.config/bas/git.toml` or `.bas/git.toml`）.
