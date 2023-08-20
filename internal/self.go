@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -146,7 +147,16 @@ func (s stringSlice) get(index int) string {
 }
 
 func info(cmd string) error {
-	_, err := LoadConfig(cmd)
+	cfg, err := LoadConfig(cmd)
+	if err != nil {
+		return err
+	}
+	rule, err := cfg.Rule()
+	if err != nil {
+		return err
+	}
+	bf, err := json.MarshalIndent(rule, " ", "  ")
+	fmt.Printf("Config: %s \nUsing Rule:\n%s\n", cfg.fileName, string(bf))
 	return err
 }
 

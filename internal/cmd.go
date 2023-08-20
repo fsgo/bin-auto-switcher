@@ -22,31 +22,31 @@ type Command struct {
 	// Match 用于匹配执行命令的正则表达式，可选
 	// 如命令为 "git add ." 则，"add ." 会交给此正则来匹配
 	// 若不匹配，当前这组命令将不会执行
-	Match string
+	Match string `json:",omitempty"`
 
 	// Cond 额外的执行条件，可选
 	// 如：
 	// go_module: 当前命令在 go module 里，即当前目录或者上级目录有 go.mod 文件
 	// exec xx.sh : 执行 xx.sh 并执行成功
 	// has_file app.toml: 当前目录或者上级目录有 app.toml 文件
-	Cond []Condition
+	Cond []Condition `json:",omitempty"`
 
 	// Cmd 命令，必填
 	Cmd string
 
-	Args []string
+	Args []string `json:",omitempty"`
 
 	// Timeout 超时时间，默认 1 分钟
-	Timeout time.Duration
+	Timeout time.Duration `json:",omitempty"`
 
-	Trace bool
+	Trace bool `json:",omitempty"`
 
 	// AllowFail 是否允许执行失败，默认否
 	// 默认情况下，当此命令执行失败后，后续命令也不会执行，程序将退出
-	AllowFail bool
+	AllowFail bool `json:",omitempty"`
 
 	// Env 执行此命令所特有的环境变量信息
-	Env []string
+	Env []string `json:",omitempty"`
 }
 
 func (c *Command) IsMatch(str string) (bool, error) {

@@ -111,15 +111,16 @@ func (c *Config) Rule() (*Rule, error) {
 
 type Rule struct {
 	Cmd  string
-	Dir  []string
-	Args []string
-	Env  []string
+	Dir  []string `json:",omitempty"`
+	Args []string `json:",omitempty"`
+	Env  []string `json:",omitempty"`
 
-	Pre   []*Command
-	Post  []*Command
-	Trace bool
+	Pre  []*Command `json:",omitempty"`
+	Post []*Command `json:",omitempty"`
 
-	Spec map[string]any
+	Trace bool `json:",omitempty"`
+
+	Spec map[string]any `json:",omitempty"`
 }
 
 func (r *Rule) Match(wd string) int {
