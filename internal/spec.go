@@ -30,7 +30,6 @@ func parserSpecial(name string, r *Rule) error {
 
 type specGo struct {
 	// GoVersionFile  定义 go 版本的文件，目前支持 go.mod、no
-	//
 	GoVersionFile string
 
 	// GoWork 是否修订当前目录未在 go.work 中定义不能运行的问题
@@ -76,11 +75,15 @@ func (s *specGo) goVersionFile(r *Rule) error {
 	}
 	if f.Go != nil && f.Go.Version != "" {
 		cmd := "go" + f.Go.Version
-		fp, err := exec.LookPath(cmd)
+		filePath, err := exec.LookPath(cmd)
 		if err != nil {
-			return err
+			if r.Trace {
+				log.Printf("LookPath %q with error, ignore it", cmd)
+			}
+			// 当不存在的时候，忽略错误
+			return nil
 		}
-		r.Cmd = fp
+		r.Cmd = filePath
 	}
 	return nil
 }
