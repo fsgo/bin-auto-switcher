@@ -10,14 +10,9 @@ go install github.com/fsgo/bin-auto-switcher/bas@latest
 ```
 
 ## 2. Config
-Local Config File（1st priority）:
+Local Config File:
 ```
 {CurrentDir}/.bas/{cmd}.toml
-```
-
-Global Config File（2nd priority）:
-```
-~/.config/bin-auto-switcher/{cmd}.toml
 ```
 
 ## 3. Example
@@ -53,6 +48,10 @@ ln -s bas go
 Cmd = "go.latest"          # command, Required
 # Env =["k1=v1","k2=v2"]   # extra env variable, Optional
 # Args = ["-k","-v"]       # extra cmd args, Optional
+[Rules.Spec]
+# use go version defined in go.mod if ‘go1.xx’( e.g. go1.21) exists
+# go1.xx should be found in $PATH
+GoVersionFile="go.mod"
 
 # [[Rules.Pre]]            # Optional, pre command
 # Match = ""               # Optional, regexp to match Args. "^add\\s" will match "git add ."
@@ -95,6 +94,8 @@ bas ln /usr/local/bin/git git
 
 2. edit config: `~/.config/bin-auto-switcher/git.toml`
 ```toml
+# Trace = true # enable trace log global
+
 [[Rules]]
 Cmd = "/usr/local/bin/git"    # the raw Cmd Path, or empty it will auto detect
 
@@ -102,7 +103,7 @@ Cmd = "/usr/local/bin/git"    # the raw Cmd Path, or empty it will auto detect
 
 [[Rules.Pre]]
 Match = "^add\\s" # when exec "git add" subCommand
-Trace = true
+# Trace = true
 # find pre-ci.sh and execute it if exists
 Cmd   = "inner:find-exec"
 Args  = ["-name","pre-ci.sh","bash","pre-ci.sh"]

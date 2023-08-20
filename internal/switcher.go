@@ -55,5 +55,8 @@ func execute(name string, args []string) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+	if err = rule.BeforeExec(name); err != nil {
+		log.Fatalln(err.Error())
+	}
 	rule.Run(args)
 }

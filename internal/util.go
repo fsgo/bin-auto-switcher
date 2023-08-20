@@ -5,7 +5,10 @@
 package internal
 
 import (
+	"archive/tar"
 	"debug/buildinfo"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +18,8 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+
+	"golang.org/x/mod/modfile"
 )
 
 func isWindows() bool {
@@ -105,4 +110,43 @@ func isSelfBin(p string) bool {
 		return false
 	}
 	return info.Path == main.Path
+}
+
+func convertByJSON(data any, to any) error {
+	bf, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bf, to)
+}
+
+var errFileNotFound = errors.New("file not found")
+
+func findFileUpper(name string, max int) (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	current := wd
+	for i := 0; i < max; i++ {
+		fp := filepath.Join(current, name)
+		st, err1 := os.Stat(fp)
+		if err1 == nil && !st.IsDir() {
+			return fp, nil
+		}
+		next := filepath.Dir(current)
+		if next == current {
+			break
+		}
+		current = next
+	}
+	return "", fmt.Errorf("%w: %s", tar.ErrFieldTooLong, name)
+}
+
+func parserGoModFile(fp string) (*modfile.File, error) {
+	content, err := os.ReadFile(fp)
+	if err != nil {
+		return nil, err
+	}
+	return modfile.Parse(fp, content, nil)
 }

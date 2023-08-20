@@ -32,8 +32,14 @@ type Config struct {
 	// Trace 是否调试模式，默认 true
 	// 目前只控制是否打印过程日志
 	Trace bool
+
+	// Spec 不同命令，特殊的配置
+	// 每种命令的配置都不同,详见 spec.go
+	Spec map[string]any
 }
 
+// Format 格式化配置内容
+// name: 执行的命令，如 go、git 等
 func (c *Config) Format() error {
 	var rawBinName string
 	for idx, r := range c.Rules {
@@ -112,6 +118,8 @@ type Rule struct {
 	Pre   []*Command
 	Post  []*Command
 	Trace bool
+
+	Spec map[string]any
 }
 
 func (r *Rule) Match(wd string) int {
@@ -131,6 +139,15 @@ func (r *Rule) Match(wd string) int {
 	return 0
 }
 
+// Merge 将 b merge 到 r
+func (r *Rule) Merge(b *Rule) {
+	// 目前只需要 merge Cmd 这一个值
+	if b.Cmd != "" {
+		r.Cmd = b.Cmd
+	}
+}
+
+// Format 格式化当前配置
 func (r *Rule) Format() error {
 	if len(r.Dir) == 0 {
 		return nil
@@ -194,6 +211,18 @@ func (r *Rule) Run(args []string) {
 	os.Exit(0)
 }
 
+func (r *Rule) BeforeExec(name string) error {
+	if r.Trace {
+		log.Printf("Cmd = %q, Spec = %v\n", r.Cmd, r.Spec)
+	}
+	if len(r.Spec) > 0 {
+		if err := parserSpecial(name, r); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, env []string) {
 	if len(cmds) == 0 {
 		return
@@ -235,7 +264,7 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 }
 
 func configDir() string {
-	return filepath.Join(homeDir, ".config", "bin-auto-switcher")
+	return filepath.Join(homeDir, ".config", "bas")
 }
 
 func globalConfigPath(name string) string {

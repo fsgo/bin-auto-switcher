@@ -21,7 +21,7 @@ var helpMessage = `
 SubCommands:
     ln {target} {link_name} :
         Like GNU's 'ln' command, create link {link_name} from {target},
-        The global config file is '~/.config/bin-auto-switcher/{link_name}.toml'.
+        The global config file is '~/.config/bas/{link_name}.toml'.
         eg: "bin-auto-switcher ln go1.19.3 go"
 
     list:
