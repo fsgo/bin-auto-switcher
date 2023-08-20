@@ -39,7 +39,7 @@ ln -s bas go
 ```
 
 
-#### 2. edit config file `go.toml` (`~/.config/bin-auto-switcher/go.toml`):
+#### 2. edit config file `go.toml` (`~/.config/bas/go.toml`):
 ```toml
 # config for 'go' command
 
@@ -51,7 +51,11 @@ Cmd = "go.latest"          # command, Required
 [Rules.Spec]
 # use go version defined in go.mod if ‘go1.xx’( e.g. go1.21) exists
 # go1.xx should be found in $PATH
-GoVersionFile="go.mod"
+# if value is "","no", skip it
+GoVersionFile = "go.mod"
+# set env GOWORK=off if module not defined in go.work
+# if value is "","no", skip it
+GoWork = "auto"
 
 # [[Rules.Pre]]            # Optional, pre command
 # Match = ""               # Optional, regexp to match Args. "^add\\s" will match "git add ."
@@ -92,7 +96,7 @@ go version go1.19.3 darwin/amd64
 bas ln /usr/local/bin/git git
 ```
 
-2. edit config: `~/.config/bin-auto-switcher/git.toml`
+2. edit config: `~/.config/bas/git.toml`
 ```toml
 # Trace = true # enable trace log global
 
@@ -168,4 +172,4 @@ eval command without links.
 bas git st
 ```
 it will eval `git st` command and also execute pre-hooks and post-hooks which defined
-in `~/.config/bin-auto-switcher/git.toml`.
+in `~/.config/bas/git.toml`.

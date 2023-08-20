@@ -7,7 +7,13 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
+
+	"golang.org/x/mod/modfile"
 )
 
 func parserSpecial(name string, r *Rule) error {
@@ -23,14 +29,34 @@ func parserSpecial(name string, r *Rule) error {
 }
 
 type specGo struct {
-	// GoVersionFile  定义 go 版本的文件，目前支持 go.mod
+	// GoVersionFile  定义 go 版本的文件，目前支持 go.mod、no
+	//
 	GoVersionFile string
+
+	// GoWork 是否修订当前目录未在 go.work 中定义不能运行的问题
+	// 目前支持:
+	// 1 auto: 若模块不在 go.work，则设置环境变量 GOWORK=off
+	// 2 no: 跳过
+	GoWork string
 }
 
 func (s *specGo) Parser(r *Rule) error {
 	if err := convertByJSON(r.Spec, s); err != nil {
 		return err
 	}
+
+	if err := s.goVersionFile(r); err != nil {
+		return err
+	}
+
+	if err := s.goWork(r); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *specGo) goVersionFile(r *Rule) error {
 	if s.GoVersionFile == "" || s.GoVersionFile == "no" {
 		return nil
 	}
@@ -55,6 +81,51 @@ func (s *specGo) Parser(r *Rule) error {
 			return err
 		}
 		r.Cmd = fp
+	}
+	return nil
+}
+
+func (s *specGo) goWork(r *Rule) error {
+	if s.GoWork == "" || s.GoWork == "no" {
+		return nil
+	}
+	if s.GoWork != "auto" {
+		return fmt.Errorf("not support GoWork=%q", s.GoWork)
+	}
+
+	fp, err := findFileUpper("go.work", 128)
+	if err != nil {
+		if errors.Is(err, errFileNotFound) {
+			return nil
+		}
+		return err
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	wd += string(filepath.Separator)
+
+	wfDir := filepath.Dir(fp)
+
+	code, err := os.ReadFile(fp)
+	if err != nil {
+		return err
+	}
+	wf, err := modfile.ParseWork(fp, code, nil)
+	if err != nil {
+		return err
+	}
+	for _, m := range wf.Use {
+		fullPath := filepath.Join(wfDir, m.Path) + string(filepath.Separator)
+		if strings.HasPrefix(wd, fullPath) {
+			return nil
+		}
+	}
+	r.Env = append([]string{"GOWORK=off"}, r.Env...)
+	if r.Trace {
+		log.Println("module not in go.work, set GOWORK=off")
 	}
 	return nil
 }
