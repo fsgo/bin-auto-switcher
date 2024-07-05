@@ -93,7 +93,7 @@ bas ln /usr/local/bin/git git
 [[Rules]]
 Cmd = "/usr/local/bin/git"    # the raw Cmd Path, or empty it will auto detect
 
-# with env "BAS_NoHook=true" to disable Pre and Post Hooks
+# with env "BAS_NoHook=true" or "bas=off" to disable Pre and Post Hooks
 
 [[Rules.Pre]]
 Match = "^add\\s" # when exec "git add" subCommand
@@ -163,3 +163,6 @@ bas git st
 ```
 it will eval `git st` command and also execute pre-hooks and post-hooks which defined
 in config file （e.g. `~/.config/bas/git.toml` or `.bas/git.toml`）.
+
+### 3.6 Disable Hooks
+with env "BAS_NoHook=true" or "bas=off" to disable Pre-Hooks and Post-Hooks

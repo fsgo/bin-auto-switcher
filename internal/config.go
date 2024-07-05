@@ -190,7 +190,7 @@ func (r *Rule) Run(args []string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	noHooks := len(os.Getenv(envKey("NoHook"))) != 0
+	noHooks := disableHooks()
 
 	if !noHooks {
 		r.execCmds(ctx, r.Pre, cmdArgsStr, env)
@@ -215,6 +215,9 @@ func (r *Rule) Run(args []string) {
 func (r *Rule) BeforeExec(name string) error {
 	if r.Trace {
 		log.Printf("Cmd = %q, Spec = %v\n", r.Cmd, r.Spec)
+	}
+	if disableHooks() {
+		return nil
 	}
 	if len(r.Spec) > 0 {
 		if err := parserSpecial(name, r); err != nil {
