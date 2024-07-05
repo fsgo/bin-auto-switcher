@@ -108,11 +108,13 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 	if err == nil {
 		return
 	}
-	msg := fmt.Sprintf("Exec %s failed: %s", c.Cmd, err.Error())
+	msg := fmt.Sprintf("Exec %s failed: %s, ExitCode=%d", c.Cmd, err.Error(), co.ExitCode())
 	if c.AllowFail {
 		msg += ", skipped"
 	}
-	fmt.Fprintln(os.Stderr, ConsoleRed(msg))
+	if c.Trace {
+		fmt.Fprintln(os.Stderr, ConsoleRed(msg))
+	}
 	if !c.AllowFail {
 		exitCode := co.ExitCode()
 		os.Exit(exitCode)
