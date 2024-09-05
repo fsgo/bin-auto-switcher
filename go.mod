@@ -2,8 +2,6 @@ module github.com/fsgo/bin-auto-switcher
 
 go 1.22.0
 
-toolchain go1.23.0
-
 require (
 	github.com/fatih/color v1.17.0
 	github.com/fsgo/fsconf v0.4.0
@@ -23,7 +21,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
