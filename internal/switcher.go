@@ -34,7 +34,7 @@ func Execute(args []string) {
 }
 
 func setup() {
-	fsenv.SetConfRootDir(configDir())
+	fsenv.SetConfDir(configDir())
 	fsenv.SetRootDir(filepath.Join(configDir(), "app_data"))
 }
 
