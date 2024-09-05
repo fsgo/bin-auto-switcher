@@ -16,7 +16,12 @@ import (
 	"strings"
 
 	"github.com/fsgo/fsconf"
+	"github.com/fsgo/fsconf/confext"
 )
+
+func init() {
+	confext.Init()
+}
 
 var enableTrace = os.Getenv(envKey("Trace")) == "true"
 

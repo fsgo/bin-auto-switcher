@@ -126,7 +126,7 @@ func cmdList() error {
 		return err
 	}
 	format := "%-12s  %-25s  %s\n"
-	fmt.Printf(format, "Name", "Bin", "Config")
+	fmt.Printf(format, "Ext", "Bin", "Config")
 	fmt.Println(strings.Repeat("-", 80))
 	for _, item := range ms {
 		name := filepath.Base(item)
