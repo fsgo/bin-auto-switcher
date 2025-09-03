@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -53,7 +54,7 @@ func usage() {
 	fmt.Fprintf(out, strings.TrimSpace(str)+"\n")
 }
 
-func executeSelf(args stringSlice) {
+func executeSelf(ctx context.Context, args stringSlice) {
 	if len(args) == 0 || args[0] == "help" || args[0] == "-help" {
 		usage()
 		return
@@ -72,7 +73,7 @@ func executeSelf(args stringSlice) {
 	default:
 		// eval 方式执行其他命令：
 		// bin-auth-switcher git st
-		execute(cmd, args[1:])
+		execute(ctx, cmd, args[1:])
 	}
 
 	if err != nil {

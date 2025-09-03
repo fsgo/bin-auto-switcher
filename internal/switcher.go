@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"context"
 	"log"
 	"path/filepath"
 	"strings"
@@ -25,12 +26,15 @@ func Execute(args []string) {
 
 	app := getApp(filepath.Base(args[0]))
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	if app == selfBinName || app == selfBinNameShort {
-		executeSelf(args[1:])
+		executeSelf(ctx, args[1:])
 		return
 	}
 
-	execute(app, args[1:])
+	execute(ctx, app, args[1:])
 }
 
 func setup() {
@@ -45,7 +49,7 @@ func getApp(name string) string {
 	return strings.TrimRight(name, ".ex")
 }
 
-func execute(name string, args []string) {
+func execute(ctx context.Context, name string, args []string) {
 	setLogPrefix("Load")
 	cfg, err := LoadConfig(name)
 	if err != nil {
@@ -55,8 +59,8 @@ func execute(name string, args []string) {
 	if err != nil {
 		log.Fatalln("Pick Rule failed:", err)
 	}
-	if err = rule.BeforeExec(name); err != nil {
+	if err = rule.BeforeExec(ctx, name); err != nil {
 		log.Fatalln("BeforeExec failed:", err)
 	}
-	rule.Run(args)
+	rule.Run(ctx, args)
 }

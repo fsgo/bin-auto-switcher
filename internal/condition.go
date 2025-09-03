@@ -6,6 +6,8 @@ package internal
 
 import (
 	"context"
+	"errors"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -66,7 +68,7 @@ func hasFile(name string) bool {
 		if err == nil && !st.IsDir() {
 			return true
 		}
-		if !os.IsNotExist(err) {
+		if !errors.Is(err, fs.ErrNotExist) {
 			log.Printf("os.Stat(%q) failed: %v", fp, err)
 			return false
 		}

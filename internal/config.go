@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -177,7 +178,7 @@ const caseInsensitiveEnv = runtime.GOOS == "windows"
 
 // var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
 
-func (r *Rule) Run(args []string) {
+func (r *Rule) Run(ctx context.Context, args []string) {
 	ss := strings.Fields(r.Cmd)
 	cmdName := ss[0]
 	cmdArgs := append(ss[1:], r.Args...)
@@ -192,7 +193,7 @@ func (r *Rule) Run(args []string) {
 
 	setLogPrefix("Before")
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	noHooks := disableHooks()
@@ -217,7 +218,7 @@ func (r *Rule) Run(args []string) {
 	os.Exit(0)
 }
 
-func (r *Rule) BeforeExec(name string) error {
+func (r *Rule) BeforeExec(ctx context.Context, name string) error {
 	if r.Trace {
 		log.Printf("Cmd = %q, Spec = %v\n", r.Cmd, r.Spec)
 	}
@@ -229,7 +230,7 @@ func (r *Rule) BeforeExec(name string) error {
 			return err
 		}
 	}
-	return nil
+	return ctx.Err()
 }
 
 func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, env []string) {
@@ -297,7 +298,7 @@ func fileExists(p string) (bool, error) {
 		}
 		return true, nil
 	}
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		return false, nil
 	}
 	return false, err
