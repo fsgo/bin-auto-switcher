@@ -4,9 +4,9 @@ go 1.25.0
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/fsgo/fsconf v0.4.0
-	github.com/fsgo/fsconf/confext v0.4.0
 	github.com/fsgo/fsenv v0.6.0
+	github.com/xanygo/anygo v0.0.0-20250903063204-6ecfffadf173
+	github.com/xanygo/ext v0.0.0-20241219072630-831a384dbaab
 	golang.org/x/mod v0.27.0
 )
 
@@ -15,7 +15,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.22.0 // indirect
+	github.com/go-playground/validator/v10 v10.23.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

@@ -16,12 +16,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fsgo/fsconf"
-	"github.com/fsgo/fsconf/confext"
+	"github.com/xanygo/anygo/xcfg"
+	"github.com/xanygo/ext/xcfgext"
 )
 
 func init() {
-	confext.Init()
+	xcfgext.Init()
 }
 
 var enableTrace = os.Getenv(envKey("Trace")) == "true"
@@ -334,7 +334,7 @@ func LoadConfig(name string) (*Config, error) {
 
 	cfg.fileName = fileName
 	if len(fileName) != 0 {
-		if err = fsconf.Parse(fileName, &cfg); err != nil {
+		if err = xcfg.Parse(fileName, &cfg); err != nil {
 			return nil, err
 		}
 	}
