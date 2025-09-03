@@ -48,7 +48,7 @@ Date    : ` + versionDate
 
 func usage() {
 	out := flag.CommandLine.Output()
-	fmt.Fprint(out, "Usage of %s:\n", filepath.Base(os.Args[0]))
+	fmt.Fprintf(out, "Usage of %s:\n", filepath.Base(os.Args[0]))
 
 	str := strings.ReplaceAll(helpMessage, "{SelfName}", os.Args[0])
 	fmt.Fprint(out, strings.TrimSpace(str)+"\n")
