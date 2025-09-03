@@ -48,10 +48,10 @@ Date    : ` + versionDate
 
 func usage() {
 	out := flag.CommandLine.Output()
-	fmt.Fprintf(out, "Usage of %s:\n", filepath.Base(os.Args[0]))
+	fmt.Fprint(out, "Usage of %s:\n", filepath.Base(os.Args[0]))
 
 	str := strings.ReplaceAll(helpMessage, "{SelfName}", os.Args[0])
-	fmt.Fprintf(out, strings.TrimSpace(str)+"\n")
+	fmt.Fprint(out, strings.TrimSpace(str)+"\n")
 }
 
 func executeSelf(ctx context.Context, args stringSlice) {
