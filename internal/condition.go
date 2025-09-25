@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 )
@@ -45,8 +46,9 @@ var conditionsFuncs = map[string]func(v string) bool{
 	"not_has_file": func(v string) bool {
 		return !hasFile(v)
 	},
-	"exec":   condExec,
-	"in_dir": condInDir,
+	"exec":              condExec,
+	"git_status_change": gitStatusChange,
+	"in_dir":            condInDir,
 	"not_in_dir": func(v string) bool {
 		return !condInDir(v)
 	},
@@ -54,6 +56,35 @@ var conditionsFuncs = map[string]func(v string) bool{
 
 func inGoModule() bool {
 	return hasFile("go.mod")
+}
+
+func gitStatusChange(str string) bool {
+	str = strings.TrimSpace(str)
+	if str == "" {
+		return true
+	}
+	str = strings.ReplaceAll(str, ";", ",")
+	exts := strings.Split(str, ",")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	gitBin := getRawBinName("git")
+	cmd := exec.CommandContext(ctx, gitBin, "status", "-s", "--column=always")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Println("exec:", cmd.String(), err)
+		return false
+	}
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		ext := filepath.Ext(line)
+		if ext != "" && slices.Contains(exts, ext) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func hasFile(name string) bool {

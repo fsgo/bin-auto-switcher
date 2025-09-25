@@ -41,6 +41,9 @@ type Command struct {
 
 	Trace bool `json:",omitempty"`
 
+	// Skip 是否跳过此命令
+	Skip bool `json:",omitempty"`
+
 	// AllowFail 是否允许执行失败，默认否
 	// 默认情况下，当此命令执行失败后，后续命令也不会执行，程序将退出
 	AllowFail bool `json:",omitempty"`
@@ -57,11 +60,19 @@ func (c *Command) IsMatch(str string) (bool, error) {
 }
 
 func (c *Command) CanRun() bool {
+	if c.Skip {
+		return false
+	}
 	if len(c.Cond) == 0 {
 		return true
 	}
 	for _, item := range c.Cond {
-		if !item.Allow() {
+		start := time.Now()
+		ok := item.Allow()
+		if c.Trace {
+			log.Printf("Condition: %q = %v cost=%s", item, ok, time.Since(start).String())
+		}
+		if !ok {
 			return false
 		}
 	}

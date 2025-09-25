@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fsgo/fsenv"
+	"github.com/xanygo/anygo/xattr"
 )
 
 const (
@@ -38,8 +38,8 @@ func Execute(args []string) {
 }
 
 func setup() {
-	fsenv.SetConfDir(configDir())
-	fsenv.SetRootDir(filepath.Join(configDir(), "app_data"))
+	xattr.SetConfDir(configDir())
+	xattr.SetRootDir(filepath.Join(configDir(), "app_data"))
 }
 
 func getApp(name string) string {

@@ -116,7 +116,9 @@ func (c *Config) Rule() (*Rule, error) {
 }
 
 type Rule struct {
-	Cmd  string
+	Cmd string
+
+	Skip bool     `json:",omitempty"` // 是否跳过此规则
 	Dir  []string `json:",omitempty"`
 	Args []string `json:",omitempty"`
 	Env  []string `json:",omitempty"`

@@ -151,6 +151,6 @@ func parserGoModFile(fp string) (*modfile.File, error) {
 }
 
 func disableHooks() bool {
-	// 环境变量 BAS_NoHook=true 或者 bas=off
-	return os.Getenv(envKey("NoHook")) != "" || os.Getenv("bas") == "off"
+	// 环境变量 BAS_NoHook=true 或者 bas=off|no
+	return os.Getenv(envKey("NoHook")) != "" || os.Getenv("bas") == "off" || os.Getenv("bas") == "no"
 }
