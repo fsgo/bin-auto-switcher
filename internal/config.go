@@ -39,6 +39,9 @@ type Config struct {
 	// 目前只控制是否打印过程日志
 	Trace bool
 
+	// 跳过所有的命令
+	Skip bool
+
 	// Spec 不同命令，特殊的配置
 	// 每种命令的配置都不同,详见 spec.go
 	Spec map[string]any
@@ -93,6 +96,9 @@ func (c *Config) Rule() (*Rule, error) {
 			}
 			if c.Trace {
 				item.Rule.Trace = true
+			}
+			if c.Skip {
+				item.Rule.Skip = true
 			}
 			ms = append(ms, item)
 		}
