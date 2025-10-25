@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io/fs"
@@ -58,22 +59,26 @@ func inGoModule() bool {
 	return hasFile("go.mod")
 }
 
+// gitStatusChange 判断状态为修改和新增的
 func gitStatusChange(str string) bool {
-	str = strings.TrimSpace(str)
-	if str == "" {
-		return true
-	}
-	str = strings.ReplaceAll(str, ";", ",")
-	exts := strings.Split(str, ",")
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	gitBin := getRawBinName("git")
-	cmd := exec.CommandContext(ctx, gitBin, "status", "-s", "--column=always")
+	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--others", "-m")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("exec:", cmd.String(), err)
 		return false
+	}
+	out = bytes.TrimSpace(out)
+	if len(out) == 0 {
+		return false
+	}
+	str = strings.TrimSpace(str)
+	str = strings.ReplaceAll(str, ";", ",")
+	exts := strings.Split(str, ",")
+	if str == "*" || len(exts) == 0 {
+		return true
 	}
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
