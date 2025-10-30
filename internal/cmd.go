@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
+	"github.com/xanygo/anygo/cli/xcolor"
 
 	"github.com/fsgo/bin-auto-switcher/internal/actuator"
 )
@@ -108,7 +108,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		if dl, ok := ctx.Deadline(); ok {
 			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		msg := color.MagentaString("Exec: ") + color.CyanString(co.String())
+		msg := xcolor.MagentaString("Exec: ") + xcolor.CyanString(co.String())
 		if len(timeout) != 0 {
 			msg += ", Timeout: " + timeout
 		}

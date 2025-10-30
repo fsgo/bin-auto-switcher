@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/xanygo/anygo/cli/xcolor"
 )
 
 var _ Actuator = (*Echo1)(nil)
@@ -24,7 +24,7 @@ func (e *Echo1) Name() string {
 }
 
 func (e *Echo1) Run(ctx context.Context) error {
-	log.Println(color.YellowString("Call Echo1: %s", e.String()))
+	log.Println(xcolor.YellowString("Call Echo1: %s", e.String()))
 	return nil
 }
 

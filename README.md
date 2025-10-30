@@ -115,10 +115,11 @@ Args  = ["-name","go.mod","staticcheck","./..."]
 AllowFail = true        # allow cmd fail
 ```
 
-### 3.3 inner:find-exec
+### 3.3 Inner Cmd
+#### inner:find-exec
 find a filename and exec another Command in this dir
 ```bash
-Usage of find-exec:
+Usage of inner:find-exec:
   -root string
        search up root dir(default "go.mod,.git")
   -name string
@@ -135,6 +136,20 @@ inner:find-exec -name go.mod gorgeous
 
 # exec: staticcheck ./...
 inner:find-exec -name go.mod staticcheck ./...
+```
+
+#### inner:git-am
+find git modified or untracked files
+```bash
+Usage of inner:git-am:
+  -name string
+    	find file name (default "go.mod")
+  -e	name as regular expression( default false)
+```
+
+Examples:
+```
+inner:git-am -name "\.(css|js)$" -e dos2unix "{name}"
 ```
 
 ### 3.4 Condition

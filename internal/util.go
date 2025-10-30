@@ -19,6 +19,8 @@ import (
 	"sync"
 
 	"golang.org/x/mod/modfile"
+
+	"github.com/fsgo/bin-auto-switcher/internal/actuator"
 )
 
 func isWindows() bool {
@@ -97,6 +99,10 @@ func getRawBinName(binName string) string {
 	}
 	rawBinNames.Store(binName, "")
 	return ""
+}
+
+func init() {
+	actuator.GetRawBinName = getRawBinName
 }
 
 func isSelfBin(p string) bool {

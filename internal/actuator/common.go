@@ -25,3 +25,5 @@ func stringsTrim(ss []string) []string {
 	}
 	return ns
 }
+
+var GetRawBinName func(binName string) string

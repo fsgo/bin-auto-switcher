@@ -16,7 +16,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/xanygo/anygo/cli/xcolor"
 )
 
 // FindExec 查找指定文件名，名在其目录下执行执行子命令
@@ -61,7 +61,7 @@ func (fe *FindExec) Run(ctx context.Context) error {
 	fset.StringVar(&fe.flagName, "name", "go.mod", "find file name")
 	fset.BoolVar(&useRegular, "e", false, "name as regular expression")
 	fset.StringVar(&notInDirs, "dir_not", "", "not in these dir names, multiple are connected with ','")
-	if err := fset.Parse(fe.Args); err != nil {
+	if err = fset.Parse(fe.Args); err != nil {
 		return err
 	}
 
@@ -187,17 +187,17 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 		}
 
 		if Trace.Load() {
-			s0 := color.GreenString("%3d.", index)
+			s0 := xcolor.GreenString("%3d.", index)
 			rl, _ := filepath.Rel(fe.wd, dir)
 			s1 := fmt.Sprintf("Dir: %s, MatchFile: %s", rl, fileName)
-			s2 := color.YellowString("Exec: %s", rr.String())
+			s2 := xcolor.YellowString("Exec: %s", rr.String())
 			log.Println(s0, s1, s2)
 		}
 
 		if e1 := rr.Run(ctx); e1 != nil {
 			fail++
 			if Trace.Load() {
-				log.Println(color.RedString(e1.Error()))
+				log.Println(xcolor.RedString(e1.Error()))
 			}
 		}
 		return fs.SkipDir
