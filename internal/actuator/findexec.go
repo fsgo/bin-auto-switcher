@@ -157,6 +157,13 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 			return err
 		}
 		if info.IsDir() {
+			// todo：通过 git ignore 判断
+			name := info.Name()
+			if name == "node_modules" || name == "temp" || name == "tmp" ||
+				strings.HasPrefix(name, ".") ||
+				strings.HasPrefix(name, "_") {
+				return fs.SkipDir
+			}
 			return nil
 		}
 

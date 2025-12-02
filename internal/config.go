@@ -107,7 +107,7 @@ func (c *Config) Rule() (*Rule, error) {
 	var using int
 	if c.Trace {
 		defer func() {
-			log.Printf("Total %d rules, using Rule %d\n", len(ms), using)
+			log.Printf("TotalRecords %d rules, using Rule %d\n", len(ms), using)
 		}()
 	}
 	if len(ms) < 2 {

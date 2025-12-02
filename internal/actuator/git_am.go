@@ -29,7 +29,10 @@ func (gm *GitAddModify) Name() string {
 
 func (gm *GitAddModify) Run(ctx context.Context) error {
 	gitBin := GetRawBinName("git")
-	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--others", "-m")
+	// --others：列出 未跟踪 的文件
+	// -m 或 --modified：列出 已修改但被跟踪 的文件
+	// --exclude-standard 不显示被 ignore 的文件
+	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--exclude-standard", "--others", "-m")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("exec:", cmd.String(), err)

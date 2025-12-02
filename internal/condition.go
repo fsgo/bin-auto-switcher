@@ -64,7 +64,7 @@ func gitStatusChange(str string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	gitBin := getRawBinName("git")
-	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--others", "-m")
+	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--exclude-standard", "--others", "-m")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("exec:", cmd.String(), err)
