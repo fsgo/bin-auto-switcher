@@ -4,7 +4,11 @@
 
 package actuator
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+	"sync/atomic"
+)
 
 func stringsTrim(ss []string) []string {
 	if len(ss) == 0 {
@@ -27,3 +31,20 @@ func stringsTrim(ss []string) []string {
 }
 
 var GetRawBinName func(binName string) string
+
+// Trace 是否打印日志
+var Trace = atomic.Bool{}
+
+// WorkDir 当前目录
+var WorkDir string
+
+func relPath(p string) string {
+	if WorkDir == "" {
+		return p
+	}
+	rp, err := filepath.Rel(WorkDir, p)
+	if err != nil {
+		return p
+	}
+	return rp
+}

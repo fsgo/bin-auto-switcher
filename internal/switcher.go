@@ -7,10 +7,13 @@ package internal
 import (
 	"context"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/xanygo/anygo/xattr"
+
+	"github.com/fsgo/bin-auto-switcher/internal/actuator"
 )
 
 const (
@@ -40,6 +43,12 @@ func Execute(args []string) {
 func setup() {
 	xattr.SetConfDir(configDir())
 	xattr.SetRootDir(filepath.Join(configDir(), "app_data"))
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("Getwd:", err)
+	}
+	actuator.WorkDir = wd
 }
 
 func getApp(name string) string {

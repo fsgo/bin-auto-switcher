@@ -105,14 +105,6 @@ func (fe *FindExec) Run(ctx context.Context) error {
 		return err
 	}
 
-	if Trace.Load() {
-		rl, err := filepath.Rel(fe.wd, rd)
-		if err == nil {
-			rl += string(filepath.Separator)
-		}
-		log.Println("FindRootDir:", rl, ", Rel.err:", err)
-	}
-
 	return fe.run(ctx, rd, match, cmdName, fset.Args()[1:])
 }
 
@@ -147,6 +139,10 @@ func (fe *FindExec) findRootDir(names []string) (string, error) {
 }
 
 func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName string) bool, cmdName string, args []string) error {
+	if Trace.Load() {
+		log.Println("scan from ", relPath(rootDir))
+	}
+
 	var index int
 	var fail int
 
@@ -162,6 +158,9 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 			if name == "node_modules" || name == "temp" || name == "tmp" ||
 				strings.HasPrefix(name, ".") ||
 				strings.HasPrefix(name, "_") {
+				if Trace.Load() {
+					log.Printf("dir %s skipped", xcolor.YellowString(relPath(path)))
+				}
 				return fs.SkipDir
 			}
 			return nil

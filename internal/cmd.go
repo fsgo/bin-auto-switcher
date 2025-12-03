@@ -70,7 +70,13 @@ func (c *Command) CanRun() bool {
 		start := time.Now()
 		ok := item.Allow()
 		if c.Trace {
-			log.Printf("Condition: %q = %v cost=%s", item, ok, time.Since(start).String())
+			var okStr string
+			if ok {
+				okStr = xcolor.GreenString("true")
+			} else {
+				okStr = xcolor.RedString("false")
+			}
+			log.Printf("Check Condition: %s = %s cost=%s", xcolor.CyanString(string(item)), okStr, time.Since(start).String())
 		}
 		if !ok {
 			return false
@@ -124,7 +130,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		msg += ", skipped"
 	}
 	if c.Trace {
-		fmt.Fprintln(os.Stderr, ConsoleRed(msg))
+		log.Println(xcolor.RedString(msg))
 	}
 	if !c.AllowFail {
 		exitCode := co.ExitCode()

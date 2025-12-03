@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/xanygo/anygo/cli/xcolor"
 	"github.com/xanygo/anygo/xcfg"
 	"github.com/xanygo/ext/xcfgext"
 )
@@ -246,20 +247,29 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 		return
 	}
 
-	for _, pc := range cmds {
+	for idx, pc := range cmds {
 		if len(pc.Cmd) == 0 {
 			continue
 		}
+
 		m, err := pc.IsMatch(argsStr)
 		if err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			log.Println(xcolor.RedString(err.Error()))
 			os.Exit(1)
 		}
 		if !m {
 			continue
 		}
+		// 只能在 action 匹配后，才允许打印日志
+
+		if pc.Trace {
+			log.Printf("%s[%s] = %s\n", xcolor.CyanString("Cmd"), xcolor.CyanString("%02d", idx), xcolor.GreenString(pc.Cmd))
+		}
 
 		if !pc.CanRun() {
+			if pc.Trace {
+				log.Println(xcolor.YellowString("No conditions matched. Skipped."))
+			}
 			continue
 		}
 
@@ -419,7 +429,8 @@ func cmdTPl(name string) string {
 }
 
 func setLogPrefix(msg string) {
-	log.SetPrefix(fmt.Sprintf("%6s | ", msg))
+	logPrefix := fmt.Sprintf("%6s ", msg)
+	log.SetPrefix(logPrefix)
 }
 
 func init() {

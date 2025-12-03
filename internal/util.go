@@ -60,13 +60,6 @@ func init() {
 	homeDir = home
 }
 
-const consoleColorTag = 0x1B
-
-// ConsoleRed 控制台红色字符
-func ConsoleRed(txt string) string {
-	return fmt.Sprintf("%c[31m%s%c[0m", consoleColorTag, txt, consoleColorTag)
-}
-
 const envKeyPrefix = "BAS_"
 
 func envKey(name string) string {

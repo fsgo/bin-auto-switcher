@@ -127,6 +127,7 @@ func condExec(v string) bool {
 	return cmd.Run() == nil
 }
 
+// condInDir 在指定的目录中
 func condInDir(v string) bool {
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -139,7 +140,8 @@ func condInDir(v string) bool {
 			continue
 		}
 		dir = filepath.Clean(dir) + string(filepath.Separator)
-		if strings.HasPrefix(pwd, dir) {
+		// 包含部分目录名即可
+		if strings.Contains(pwd, dir) {
 			return true
 		}
 	}
