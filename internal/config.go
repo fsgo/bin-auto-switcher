@@ -263,12 +263,12 @@ func (r *Rule) execCmds(ctx context.Context, cmds []*Command, argsStr string, en
 		// 只能在 action 匹配后，才允许打印日志
 
 		if pc.Trace {
-			log.Printf("%s[%s] = %s\n", xcolor.CyanString("Cmd"), xcolor.CyanString("%02d", idx), xcolor.GreenString(pc.Cmd))
+			log.Printf("%s[%s] > %s\n", xcolor.CyanString("Cmd"), xcolor.CyanString("%02d", idx), xcolor.GreenString(pc.Cmd))
 		}
 
 		if !pc.CanRun() {
 			if pc.Trace {
-				log.Println(xcolor.YellowString("No conditions matched. Skipped."))
+				log.Println(xcolor.HiBlackString("No conditions matched. Skipped."))
 			}
 			continue
 		}

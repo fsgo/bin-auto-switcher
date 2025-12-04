@@ -16,6 +16,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/xanygo/anygo/cli/xcolor"
 )
 
 type Condition string
@@ -105,7 +107,7 @@ func hasFile(name string) bool {
 			return true
 		}
 		if !errors.Is(err, fs.ErrNotExist) {
-			log.Printf("os.Stat(%q) failed: %v", fp, err)
+			log.Printf("os.Stat(%q) failed: %s", fp, xcolor.RedString(err.Error()))
 			return false
 		}
 		wd = filepath.Dir(wd)

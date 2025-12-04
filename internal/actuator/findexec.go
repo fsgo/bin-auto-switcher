@@ -15,8 +15,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/xanygo/anygo/cli/xcolor"
+
+	"github.com/fsgo/bin-auto-switcher/internal/common"
 )
 
 // FindExec 查找指定文件名，名在其目录下执行执行子命令
@@ -191,20 +194,28 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 			Args: args,
 			Dir:  dir,
 		}
-
+		var logs []string
 		if Trace.Load() {
-			s0 := xcolor.GreenString("%3d.", index)
+			s0 := xcolor.GreenString("%2d.", index)
 			rl, _ := filepath.Rel(fe.wd, dir)
-			s1 := fmt.Sprintf("Dir: %s, MatchFile: %s", rl, fileName)
-			s2 := xcolor.YellowString("Exec: %s", rr.String())
-			log.Println(s0, s1, s2)
+			s1 := fmt.Sprintf("Dir= %s MatchFile= %s", rl, fileName)
+			s2 := xcolor.CyanString("%s", rr.String())
+			logs = append(logs, s0, s1, xcolor.GreenString("Exec="), s2)
 		}
-
-		if e1 := rr.Run(ctx); e1 != nil {
+		start := time.Now()
+		e1 := rr.Run(ctx)
+		cost := time.Since(start)
+		if Trace.Load() {
+			logs = append(logs, "cost=", common.CostString(cost))
+		}
+		if e1 != nil {
 			fail++
 			if Trace.Load() {
-				log.Println(xcolor.RedString(e1.Error()))
+				logs = append(logs, "err=", xcolor.RedString(e1.Error()))
 			}
+		}
+		if Trace.Load() {
+			log.Println(strings.Join(logs, " "))
 		}
 		return fs.SkipDir
 	})

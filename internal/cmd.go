@@ -16,6 +16,7 @@ import (
 	"github.com/xanygo/anygo/cli/xcolor"
 
 	"github.com/fsgo/bin-auto-switcher/internal/actuator"
+	"github.com/fsgo/bin-auto-switcher/internal/common"
 )
 
 type Command struct {
@@ -66,7 +67,7 @@ func (c *Command) CanRun() bool {
 	if len(c.Cond) == 0 {
 		return true
 	}
-	for _, item := range c.Cond {
+	for idx, item := range c.Cond {
 		start := time.Now()
 		ok := item.Allow()
 		if c.Trace {
@@ -74,9 +75,9 @@ func (c *Command) CanRun() bool {
 			if ok {
 				okStr = xcolor.GreenString("true")
 			} else {
-				okStr = xcolor.RedString("false")
+				okStr = xcolor.HiBlackString("false")
 			}
-			log.Printf("Check Condition: %s = %s cost=%s", xcolor.CyanString(string(item)), okStr, time.Since(start).String())
+			log.Printf("Check Condition %2d: %s = %s, cost = %s", idx, xcolor.CyanString(string(item)), okStr, common.CostString(time.Since(start)))
 		}
 		if !ok {
 			return false
@@ -108,20 +109,24 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		Args: args,
 		Env:  env,
 	}
-
+	var logMsg string
 	if c.Trace {
 		var timeout string
 		if dl, ok := ctx.Deadline(); ok {
 			timeout = fmt.Sprintf("%.1fs", time.Until(dl).Seconds())
 		}
-		msg := xcolor.MagentaString("Exec: ") + xcolor.CyanString(co.String())
+		logMsg = xcolor.MagentaString("Exec: ") + xcolor.CyanString(co.String())
 		if len(timeout) != 0 {
-			msg += ", Timeout: " + timeout
+			logMsg += ", Timeout = " + timeout
 		}
-		log.Println(msg)
 	}
-
+	start := time.Now()
 	err := co.Run(ctx)
+	cost := time.Since(start)
+	if c.Trace {
+		logMsg += ", cost= " + common.CostString(cost)
+		log.Println(logMsg)
+	}
 	if err == nil {
 		return
 	}
