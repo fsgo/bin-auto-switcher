@@ -27,12 +27,35 @@ func (gm *GitAddModify) Name() string {
 	return Prefix + "git-am"
 }
 
+// Run
+//
+//	git status -su
+//	 XY 文件路径
+//	 MM file.html   ->  已修改（modified），且已 git add,而且工作区有修改（未 add）
+//
+// 第一列（X）的含义: 暂存区（index）状态
+//
+//	 标志	含义
+//	    （空格）	暂存区无变化
+//	   M	已修改（modified），且已 git add
+//	   A	已新增（added），已加入暂存区
+//	   D	已删除（deleted），已暂存
+//	   R	重命名（renamed）
+//	   C	复制（copied）
+//	   U	冲突（unmerged）
+//
+//	第二列（Y）的含义:工作区（working tree）状态
+//	   标志	含义
+//	   （空格）	工作区无变化
+//	   M	工作区有修改（未 add）
+//	   D	工作区已删除
+//	   ?	未跟踪文件（配合 -u）
+//	   U	冲突
+//
+//	?? 是一个整体，表示“未跟踪文件（untracked）”,既不在暂存区，也不在版本库中 —— 完全是 Git 不认识的新文件
 func (gm *GitAddModify) Run(ctx context.Context) error {
 	gitBin := GetRawBinName("git")
-	// --others：列出 未跟踪 的文件
-	// -m 或 --modified：列出 已修改但被跟踪 的文件
-	// --exclude-standard 不显示被 ignore 的文件
-	cmd := exec.CommandContext(ctx, gitBin, "ls-files", "--exclude-standard", "--others", "-m")
+	cmd := exec.CommandContext(ctx, gitBin, "status", "-su")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("exec:", cmd.String(), err)
@@ -75,8 +98,16 @@ func (gm *GitAddModify) Run(ctx context.Context) error {
 
 	lines := strings.Split(string(out), "\n")
 	var errs []error
-	for _, filename := range lines {
-		filename = strings.TrimSpace(filename)
+	for _, line := range lines {
+		if len(line) < 3 {
+			continue
+		}
+		xy := line[:2]
+		// D: 删除状态,U:冲突
+		if strings.ContainsAny(xy, "DU") {
+			continue
+		}
+		filename := strings.TrimSpace(line[2:])
 		if filename == "" || !match(filename) {
 			continue
 		}
