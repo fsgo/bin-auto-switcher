@@ -107,7 +107,17 @@ func (gm *GitAddModify) Run(ctx context.Context) error {
 		if strings.ContainsAny(xy, "DU") {
 			continue
 		}
+
 		filename := strings.TrimSpace(line[2:])
+
+		// R: rename
+		// RM old name -> new name
+		if strings.Contains(xy, "R") {
+			if _, after, ok := strings.Cut(filename, " ->"); ok {
+				filename = strings.TrimSpace(after)
+			}
+		}
+
 		if filename == "" || !match(filename) {
 			continue
 		}

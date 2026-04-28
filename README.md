@@ -118,7 +118,7 @@ AllowFail = true        # allow cmd fail
 ### 3.3 Inner Cmd
 #### inner:find-exec
 Find a filename and execute a command in the directory.
-Skip directories named `node_modules`,`temp` or `tmp`, or those whose names start with `.` or `_`.
+Skip directories named `node_modules`,`temp` or `tmp`, `target`, or those whose names start with `.` or `_`.
 ```bash
 Usage of inner:find-exec:
   -root string
