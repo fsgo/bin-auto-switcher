@@ -72,7 +72,7 @@ func executeSelf(ctx context.Context, args stringSlice) {
 		err = initConf(args.get(1))
 	default:
 		// eval 方式执行其他命令：
-		// bin-auth-switcher git st
+		// bas git st
 		execute(ctx, cmd, args[1:])
 	}
 

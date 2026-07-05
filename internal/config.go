@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 
@@ -188,10 +189,8 @@ const caseInsensitiveEnv = runtime.GOOS == "windows"
 // var signalsToIgnore = []os.Signal{os.Interrupt, syscall.SIGQUIT}
 
 func (r *Rule) Run(ctx context.Context, args []string) {
-	ss := strings.Fields(r.Cmd)
-	cmdName := ss[0]
-	cmdArgs := append(ss[1:], r.Args...)
-	cmdArgs = append(cmdArgs, args...)
+	cmdName := r.Cmd
+	cmdArgs := slices.Clone(args)
 	cmdArgsStr := strings.Join(cmdArgs, " ")
 
 	env := dedupEnv(caseInsensitiveEnv, append(os.Environ(), r.Env...))

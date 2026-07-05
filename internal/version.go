@@ -4,6 +4,6 @@
 
 package internal
 
-const version = "0.2.9"
+const version = "0.2.10"
 
-const versionDate = "2026-04-28"
+const versionDate = "2026-07-05"

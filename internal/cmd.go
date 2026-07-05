@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/xanygo/anygo/cli/xcolor"
@@ -98,15 +98,12 @@ func (c *Command) getTimeout() time.Duration {
 func (c *Command) Exec(ctx context.Context, env []string) {
 	actuator.Trace.Store(c.Trace)
 
-	ss := strings.Fields(c.Cmd)
-	args := append(ss[1:], c.Args...)
-
 	// 将当前命令所特有的环境变量放在最后：覆盖之前的值
 	env = dedupEnv(caseInsensitiveEnv, append(env, c.Env...))
 
 	co := &actuator.Config{
-		Name: ss[0],
-		Args: args,
+		Name: c.Cmd,
+		Args: slices.Clone(c.Args),
 		Env:  env,
 	}
 	var logMsg string
@@ -135,6 +132,7 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		msg += ", skipped"
 	}
 	if c.Trace {
+		log.Printf("Cmd=%q, args=%q", c.Cmd, c.Args)
 		log.Println(xcolor.RedString(msg))
 	}
 	if !c.AllowFail {
