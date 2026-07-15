@@ -206,12 +206,12 @@ func (fe *FindExec) run(ctx context.Context, rootDir string, match func(fileName
 		e1 := rr.Run(ctx)
 		cost := time.Since(start)
 		if Trace.Load() {
-			logs = append(logs, "cost=", common.CostString(cost))
+			logs = append(logs, "Cost=", common.CostString(cost))
 		}
 		if e1 != nil {
 			fail++
 			if Trace.Load() {
-				logs = append(logs, "err=", xcolor.RedString(e1.Error()))
+				logs = append(logs, "Err=", xcolor.RedString(e1.Error()))
 			}
 		}
 		if Trace.Load() {

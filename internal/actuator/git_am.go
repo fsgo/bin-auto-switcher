@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var _ Actuator = (*GitAddModify)(nil)
@@ -97,6 +98,12 @@ func (gm *GitAddModify) Run(ctx context.Context) error {
 	}
 
 	lines := strings.Split(string(out), "\n")
+
+	cnts := map[string]int{
+		"Total":   len(lines),
+		"Matched": 0,
+		"Failed":  0,
+	}
 	var errs []error
 	for _, line := range lines {
 		if len(line) < 3 {
@@ -122,6 +129,8 @@ func (gm *GitAddModify) Run(ctx context.Context) error {
 			continue
 		}
 
+		cnts["Matched"]++
+
 		var args []string
 		for _, a := range fset.Args() {
 			a = strings.ReplaceAll(a, "{name}", filename)
@@ -131,15 +140,26 @@ func (gm *GitAddModify) Run(ctx context.Context) error {
 		if len(args) > 1 {
 			extArgs = args[1:]
 		}
+		start := time.Now()
 		sub := exec.CommandContext(ctx, args[0], extArgs...)
 		if Trace.Load() {
 			log.Println("Exec:", sub.String())
 		}
 		err1 := sub.Run()
+		cost := time.Since(start)
 		if err1 != nil {
+			cnts["Failed"]++
 			errs = append(errs, err1)
+			if Trace.Load() {
+				log.Println("Exec Failed:", sub.String(), "Cost=", cost.String(), "Err=", err1.Error())
+			}
 		}
 	}
+
+	if Trace.Load() {
+		log.Println("git-am statistics:", cnts)
+	}
+
 	return errors.Join(errs...)
 }
 

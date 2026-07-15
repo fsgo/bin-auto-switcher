@@ -114,15 +114,21 @@ func (c *Command) Exec(ctx context.Context, env []string) {
 		}
 		logMsg = xcolor.MagentaString("Exec: ") + xcolor.CyanString(co.String())
 		if len(timeout) != 0 {
-			logMsg += ", Timeout = " + timeout
+			logMsg += ", Timeout=" + timeout
 		}
+		log.Println("[Begin]", logMsg)
 	}
 	start := time.Now()
 	err := co.Run(ctx)
 	cost := time.Since(start)
 	if c.Trace {
-		logMsg += ", cost= " + common.CostString(cost)
-		log.Println(logMsg)
+		logMsg += ", Cost=" + common.CostString(cost) + ", Err="
+		if err != nil {
+			logMsg += err.Error()
+		} else {
+			logMsg += "nil"
+		}
+		log.Println("[ End ]", logMsg)
 	}
 	if err == nil {
 		return
